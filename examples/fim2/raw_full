@@ -1,0 +1,75 @@
+<|repo_name|>ask-openai.nvim
+<|file_sep|>instructions.txt
+General project code rules:
+- Never add comments to the end of a line.
+- NEVER add TODO comments for me.
+<|file_sep|>global.md
+## General Code Preferences
+
+- Avoid ambiguity, for example:
+
+```lua
+-- 👎 if there's a bug in the regex, how would I know? I'd have to surmise from surrounding code 🤮
+if line:match("^%s*$") then
+    -- ...
+end
+```
+
+```lua
+-- 🙌 clear intent
+local is_blank_line = line:match("^%s*$")
+if is_blank_line then
+    -- ...
+end
+```
+<|file_sep|>lua.md
+## Lua Code Preferences
+
+- use snake_case for functions and variables
+- use PascalCase for classes
+- use EmmyLua/LuaLS annotations to improve code completion
+- use `luac` to check for syntax errors
+
+Examples:
+```lua
+---@param names string[]
+---@param checker fun(name: string): boolean
+---@return table<string, integer>
+function process_names(names, checker) end
+
+---@class WindowController
+---@field window hs.axuielement
+---@field title? string
+---@field size { w: number, h: number }
+local WindowController = {}
+```
+<|file_sep|>/Users/wesdemos/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/predictions/backends/fim_backend.lua:139-143
+function()
+            return fim.qwen25coder.get_fim_prompt(self) -- WORKS FOR repo level using qwen's format entirely! (plus set qwen's stop_tokens to avoid rambles / trailing stop tokens)
+            -- return fim.bytedance_seed_coder.get_fim_prompt_file_level_only(self) -- WORKS well for file level using its own SPM format
+            -- return fim.bytedance_seed_coder.get_fim_prompt_repo_level(self)
+        end<|file_sep|>/Users/wesdemos/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/predictions/backends/fim_backend.lua:174-176
+function()
+            return fim.codestral.get_fim_prompt(self)
+        end<|file_sep|>/Users/wesdemos/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/predictions/backends/fim_backend.lua:135-137
+function()
+            return fim.qwen25coder.get_fim_prompt(self)
+        end<|file_sep|>/Users/wesdemos/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/predictions/backends/fim_backend.lua:125-127
+function()
+            return fim.qwen25coder.get_fim_prompt(self)
+        end<|file_sep|>/Users/wesdemos/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/predictions/backends/fim_backend.lua:117-119
+function()
+            return fim.mellum.get_fim_prompt(self)
+        end<|file_sep|>lua/ask-openai/predictions/tests/calc/calc.lua
+<|fim_prefix|>local M = {}
+
+function M.add(a, b)
+    return <|fim_suffix|>
+end
+
+function M.sub(a, b)
+    return b
+end
+
+
+return M<|fim_middle|>a + b

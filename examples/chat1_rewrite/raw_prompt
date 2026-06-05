@@ -1,0 +1,108 @@
+<|im_start|>system
+## Ground rules:
+- Follow the user's instructions carefully.
+- DO NOT wrap answers in markdown code blocks, which means no triple backticks like ``` nor single backtick like ` .
+- Do not explain answers, just give me code.
+- Respect indentation when modifying code.
+- Prefer meaningful names for variables, functions, etc. Avoid ambiguous names.<|im_end|>
+<|im_start|>user
+## General Code Preferences
+
+- Avoid ambiguity, for example:
+
+```lua
+-- 👎 if there's a bug in the regex, how would I know? I'd have to surmise from surrounding code 🤮
+if line:match("^%s*$") then
+    -- ...
+end
+```
+
+```lua
+-- 🙌 clear intent
+local is_blank_line = line:match("^%s*$")
+if is_blank_line then
+    -- ...
+end
+```<|im_end|>
+<|im_start|>user
+## Lua Code Preferences
+
+- use snake_case for functions and variables
+- use PascalCase for classes
+- use EmmyLua/LuaLS annotations to improve code completion
+- use `luac` to check for syntax errors
+
+Examples:
+```lua
+---@param names string[]
+---@param checker fun(name: string): boolean
+---@return table<string, integer>
+function process_names(names, checker) end
+
+---@class WindowController
+---@field window hs.axuielement
+---@field title? string
+---@field size { w: number, h: number }
+local WindowController = {}
+```<|im_end|>
+<|im_start|>user
+# Semantic Grep matches: 5
+
+This is automatic context based on my request. These may or may not be relevant.
+## /Users/wesdemos/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/predictions/tests/calc/calc-user.lua:0-4
+local calc = require("calc")
+print("1+3 = " .. calc.add(1, 3))
+
+print("sqrt of -5 = " .. tostring(calc.sqroot(-5)))
+-- print("2 * pi = "
+
+
+## /Users/wesdemos/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/predictions/tests/calc/calc-from-14b-q8-way-further-coherent.lua:49-57
+
+
+-- Note: This Lua module provides basic arithmeti0c
+
+
+
+
+
+return M
+
+
+## /Users/wesdemos/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/predictions/tests/calc/calc-from-14b-q8-way-further-coherent.lua:21-24
+-- Adding support for modulo operation
+function M.mod(a, b)
+    return a % b
+end
+
+## /Users/wesdemos/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/predictions/tests/calc/calc-from-14b-q8-way-further-coherent.lua:2-4
+function M.add(a, b)
+    return a + b
+end
+
+## /Users/wesdemos/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/frontends/context/coc/learn/diagnostics.lua:0-3
+local log = require("ask-openai.logs.logger").predictions()
+
+local M = {}<|im_end|>
+<|im_start|>user
+finish the class (dont think too much)
+
+Here is the code I selected:
+```lua/ask-openai/predictions/tests/calc/calc.lua:1-12
+local M = {}
+
+function M.add(a, b)
+    return a + b
+end
+
+function M.sub(a, b)
+    return b
+end
+
+
+return M
+```
+
+This is not necessarily a complete selection of nearby code, this is just the part I want help with. Preserve indentation!<|im_end|>
+<|im_start|>assistant
+<think>

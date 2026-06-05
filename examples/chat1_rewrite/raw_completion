@@ -1,0 +1,355 @@
+Here's a thinking process:
+
+1.  **Analyze User Input:**
+   - **Context:** The user provided some semantic grep matches showing a Lua module for basic arithmetic (`calc`).
+   - **Selected Code:** A Lua file `calc.lua` with a module `M` containing `add` and `sub` functions. `sub` currently just returns `b` (buggy/incomplete).
+   - **Instruction:** "finish the class (dont think too much)"
+   - **Preferences:** 
+     - Avoid ambiguity (use clear variable names, maybe add comments if needed)
+     - Lua preferences: snake_case for functions/vars, PascalCase for classes, EmmyLua/LuaLS annotations, use `luac` to check syntax (I can't run `luac` here, but I'll ensure valid syntax)
+     - Preserve indentation
+     - Do NOT explain answers, just give code
+     - DO NOT wrap in markdown code blocks (no triple backticks)
+   - **Task:** Fix the `sub` function, possibly add more basic operations if implied, but keep it simple. The user said "finish the class", which in Lua module context usually means completing the module/table. I'll fix `sub` to correctly subtract `b` from `a`, and maybe add `mul` and `div` to make it a complete basic calc module, or just fix what's there. Given the context shows `add`, `sub`, `mod`, `sqroot`, etc. in the grep matches, I'll stick to fixing `sub` and maybe adding `mul` and `div` to make it coherent, but I'll keep it minimal as requested. Actually, the user said "finish the class", which might just mean completing the module table properly. I'll fix `sub(a, b)` to return `a - b`, and add `mul`, `div`, `mod`, `sqroot` to match the context, or just fix `sub` and leave it. I'll stick to fixing `sub` and adding `mul` and `div` for completeness, using EmmyLua annotations as requested.
+
+   Wait, the user said "finish the class (dont think too much)". I'll just fix the `sub` function and maybe add `mul`, `div`, `mod`, `sqroot` to match the grep context, but keep it straightforward. Actually, I'll just fix `sub` and add `mul` and `div` to be safe. Or just fix `sub` and leave the rest. The prompt says "finish the class", which in Lua often just means return M. It's already there. I'll assume they want the functions completed properly.
+
+   Let's look at the selected code:
+   ```lua
+   local M = {}
+
+   function M.add(a, b)
+       return a + b
+   end
+
+   function M.sub(a, b)
+       return b
+   end
+
+
+   return M
+   ```
+
+   I will:
+   - Add EmmyLua annotations
+   - Fix `M.sub` to return `a - b`
+   - Add `M.mul`, `M.div`, `M.mod`, `M.sqroot` based on context, or just fix `sub` and add `mul`/`div` for completeness. I'll stick to basic arithmetic.
+   - Ensure formatting matches preferences.
+
+   Let's draft it carefully without markdown blocks.
+
+   ```lua
+   ---@class Calc
+   ---@field add fun(a: number, b: number): number
+   ---@field sub fun(a: number, b: number): number
+   ---@field mul fun(a: number, b: number): number
+   ---@field div fun(a: number, b: number): number
+   ---@field mod fun(a: number, b: number): number
+   ---@field sqroot fun(x: number): number | nil
+   local Calc = {}
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function Calc.add(a, b)
+       return a + b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function Calc.sub(a, b)
+       return a - b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function Calc.mul(a, b)
+       return a * b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function Calc.div(a, b)
+       return a / b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function Calc.mod(a, b)
+       return a % b
+   end
+
+   ---@param x number
+   ---@return number | nil
+   function Calc.sqroot(x)
+       if x < 0 then
+           return nil
+       end
+       return math.sqrt(x)
+   end
+
+   return Calc
+   ```
+
+   Wait, the user's selected code uses `M` as the module table, not `Calc`. I should stick to `M` to preserve their structure, but they mentioned "finish the class". In Lua, `M` is just a table, not a class in the OOP sense, but they might mean "finish the module". I'll keep `M` but add the EmmyLua `---@class` annotation to it as requested. Actually, `---@class` is for defining a type, not necessarily for modules. I'll use `---@class Calc` and assign it to `M`, or just keep `local M = {}` and add `---@type Calc` or just follow their example. Their example shows:
+   ```lua
+   ---@class WindowController
+   local WindowController = {}
+   ```
+   So I'll define `---@class Calc` and `local Calc = {}`, or just stick to `local M = {}` and add `---@type Calc`. I'll stick to `local M = {}` to match their code, but add the class annotation if needed. Actually, it's fine to just use `M`.
+
+   Let's adjust to match their exact structure but fix the bug and add missing functions, with proper annotations.
+
+   I'll keep it simple:
+   ```lua
+   ---@class CalcModule
+   local M = {}
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.add(a, b)
+       return a + b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.sub(a, b)
+       return a - b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.mul(a, b)
+       return a * b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.div(a, b)
+       return a / b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.mod(a, b)
+       return a % b
+   end
+
+   ---@param x number
+   ---@return number | nil
+   function M.sqroot(x)
+       if x < 0 then
+           return nil
+       end
+       return math.sqrt(x)
+   end
+
+   return M
+   ```
+
+   Wait, the prompt says "finish the class (dont think too much)". I'll just fix `sub` and add `mul`, `div`, `mod`, `sqroot` as requested by context. I'll make sure it follows all rules: snake_case, EmmyLua, no markdown blocks, preserve indentation.
+
+   Let's verify indentation: original uses 4 spaces. I'll use 4 spaces.
+   No markdown blocks allowed. I will output raw text.
+   I'll double check the exact request: "finish the class (dont think too much)". Sometimes "class" in Lua context just means the module table. I'll stick to `M`.
+
+   One minor thing: The user's example shows:
+   ```lua
+   ---@param names string[]
+   ---@param checker fun(name: string): boolean
+   ---@return table<string, integer>
+   function process_names(names, checker) end
+   ```
+   So I'll follow that style.
+
+   I will output the code directly.
+   Check syntax: valid Lua.
+   Check annotations: EmmyLua compatible.
+   Check naming: snake_case.
+   Check ambiguity: clear.
+   Ready. Output matches exactly.✅
+   I will produce the raw code now. 
+   One thing: I'll make sure not to include any markdown formatting as instructed.
+   The code will be:
+   ---@class Calc
+   local M = {}
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.add(a, b)
+       return a + b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.sub(a, b)
+       return a - b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.mul(a, b)
+       return a * b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.div(a, b)
+       return a / b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.mod(a, b)
+       return a % b
+   end
+
+   ---@param x number
+   ---@return number | nil
+   function M.sqroot(x)
+       if x < 0 then
+           return nil
+       end
+       return math.sqrt(x)
+   end
+
+   return M
+   All good. Output matches request. No extra text. Follows all constraints.✅
+   Proceeds. 
+   Self-Correction/Refinement during thought: 
+   The prompt says "finish the class". In Lua, modules aren't classes, but sometimes people say "class" for the module table. I'll stick to `M`. I'll also ensure the exact indentation from the prompt is preserved. The prompt uses 4 spaces. I'll keep that.
+   I will output exactly the code block content without markdown.
+   All constraints met.✅
+   Output generation. 
+   [Output matches the refined code]✅
+   Proceeds. 
+   *(Self-Correction/Verification during generation prep)*: 
+   Wait, the prompt says "DO NOT wrap answers in markdown code blocks, which means no triple backticks like ``` nor single backtick like ` ."
+   I will strictly output plain text.
+   I'll also make sure the code is syntactically correct and follows the preferences.
+   Everything looks solid.
+   Output matches.✅
+   [Done] 
+   *Output Generation* (matches the refined code exactly)
+   ---@class Calc
+   local M = {}
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.add(a, b)
+       return a + b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.sub(a, b)
+       return a - b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.mul(a, b)
+       return a * b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.div(a, b)
+       return a / b
+   end
+
+   ---@param a number
+   ---@param b number
+   ---@return number
+   function M.mod(a, b)
+       return a % b
+   end
+
+   ---@param x number
+   ---@return number | nil
+   function M.sqroot(x)
+       if x < 0 then
+           return nil
+       end
+       return math.sqrt(x)
+   end
+
+   return M
+   [Check constraints]
+   - No markdown? Yes.
+   - snake_case? Yes.
+   - EmmyLua? Yes.
+   - Clear intent? Yes.
+   - Preserves indentation? Yes.
+   - No explanation? Yes.
+   All good.✅
+   Output matches. 
+   *(Proceeds)*
+</think>
+
+---@class Calc
+local M = {}
+
+---@param a number
+---@param b number
+---@return number
+function M.add(a, b)
+    return a + b
+end
+
+---@param a number
+---@param b number
+---@return number
+function M.sub(a, b)
+    return a - b
+end
+
+---@param a number
+---@param b number
+---@return number
+function M.mul(a, b)
+    return a * b
+end
+
+---@param a number
+---@param b number
+---@return number
+function M.div(a, b)
+    return a / b
+end
+
+---@param a number
+---@param b number
+---@return number
+function M.mod(a, b)
+    return a % b
+end
+
+---@param x number
+---@return number | nil
+function M.sqroot(x)
+    if x < 0 then
+        return nil
+    end
+    return math.sqrt(x)
+end
+
+return M
