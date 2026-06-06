@@ -30,7 +30,7 @@ export default grammar({
     // message_content: $ => repeat($.any), // TODO constrain this at all?
     message_content: $ => prec(-9, field("contents", $.text)),
 
-    role: $ => /[^\n]+/, // take until end of line
+    role: $ => /[^\n]+/, // greedy, take until end of line
 
     text: $ => repeat1(choice(
       /[^<]+/, // be greedy with any other char (not <)
