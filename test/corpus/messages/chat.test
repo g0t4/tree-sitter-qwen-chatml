@@ -2,8 +2,12 @@
 user message
 :language(qwen_chatml)
 ==================
+<|im_start|>system
+Answer the question<|im_end|>
+<|im_start|>user
+What is the color of the sky?<|im_end|>
 <|im_start|>assistant
-The sky is blue!<|im_end|>
+The sky is blue.<|im_end|>
 ---
 (source_file
   (message
