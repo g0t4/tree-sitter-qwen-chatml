@@ -1,0 +1,25 @@
+==================
+file level FIM (prompt only, IOTW nothing after <|fim_middle|> so the model can respond)
+:language(qwen_chatml)
+==================
+<|fim_prefix|>local M = {}
+
+function M.add(a, b)
+    return a + b
+end
+
+function M.sub(a, b)
+    return b
+end
+
+<|fim_suffix|>
+
+return M<|fim_middle|>
+---
+(source_file
+  (fim_prefix
+    contents: (text)
+  (fim_suffix
+    contents: (text)
+  (fim_middle
+    contents: (text)))
