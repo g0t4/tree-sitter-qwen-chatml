@@ -2,17 +2,18 @@
   "name": "tree-sitter-qwen-chatml",
   "version": "0.1.0",
   "description": "Parser for raw prompts and completions when working with Qwen models.",
+  "homepage": "https://github.com/g0t4/tree-sitter-qwen_chatml#readme",
+  "bugs": {
+    "url": "https://github.com/g0t4/tree-sitter-qwen_chatml/issues"
+  },
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tree-sitter/tree-sitter-qwen_chatml.git"
+    "url": "git+https://github.com/g0t4/tree-sitter-qwen_chatml.git"
   },
-  "funding": "",
   "license": "MIT",
   "author": {
-    "name": "Wes Higbee",
-    "email": "wes.mcclure@gmail.com",
-    "url": "weshigbee.com"
+    "name": "Wes Higbee"
   },
   "main": "bindings/node",
   "types": "bindings/node",
@@ -53,6 +54,8 @@
     "install": "node-gyp-build",
     "prestart": "tree-sitter build --wasm",
     "start": "tree-sitter playground",
-    "test": "node --test bindings/node/*_test.js"
+    "test": "node --test bindings/node/*_test.js",
+    "test_corpus": "./scripts/tests.fish",
+    "build": "./scripts/build.fish"
   }
 }
