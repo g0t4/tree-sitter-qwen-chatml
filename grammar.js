@@ -14,6 +14,7 @@ export default grammar({
   name: "qwen_chatml",
 
   inline: $ => [
+    $.role,
     $.message_content,
   ],
 
@@ -27,16 +28,16 @@ export default grammar({
 
     message: $ => seq($.im_start, $.role, '\n', $.message_content, $.im_end),
 
+    role: $ => field("role", $.role_name), // greedy, take until end of line
+    role_name: $ => repeat1(/[^\n]+/),
+
     // message_content: $ => repeat($.any), // TODO constrain this at all?
     message_content: $ => prec(-9, field("contents", $.text)),
-
-    role: $ => /[^\n]+/, // greedy, take until end of line
 
     text: $ => repeat1(choice(
       /[^<]+/, // be greedy with any other char (not <)
       /</ // force decision on single < which means it is allowed too just only one char at a time
     )),
-
 
     im_start: $ => token(constants.IM_START),
     im_end: $ => token(constants.IM_END),
