@@ -22,6 +22,7 @@ export default grammar({
     $.file_contents,
     $.file_name,
     $.reasoning,
+    $.thoughts,
   ],
 
   rules: {

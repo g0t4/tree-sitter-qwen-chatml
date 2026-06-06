@@ -26,9 +26,8 @@ The sky is blue.<|im_end|>
   (message
     (im_start_token)
     role: (role_name) 
-    (thoughts
-      (think_open_token)
-      reasoning: (text)
-      (think_close_token))
+    (think_open_token)
+    reasoning: (text)
+    (think_close_token)
     contents: (text)
     (im_end_token)))
