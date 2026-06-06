@@ -57,6 +57,7 @@
     "test": "node --test bindings/node/*_test.js",
     "test_corpus": "./scripts/tests.fish",
     "clean": "./scripts/clean.fish",
-    "build": "./scripts/build.fish"
+    "build": "./scripts/build.fish",
+    "watch": "nodemon -e qwen_chatml -e js,qwen_chatml,test  --exec 'tree-sitter generate && tree-sitter test'"
   }
 }
