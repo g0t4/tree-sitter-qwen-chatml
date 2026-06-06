@@ -19,12 +19,10 @@ export default grammar({
   ],
 
   rules: {
-    source_file: $ => repeat($.message),
-    // TODO when doing FIM you'll wanna switch to a sequence of choices for the top-level of source_file
-    // source_file: $ => seq(
-    //   repeat($.message),
-    //   fim_message => (fim_prefix, fim_suffix, fim_middle),
-    // ),
+    source_file: $ => choice(
+      repeat($.message),
+      seq($.fim_prefix, $.message_content, $.fim_suffix, $.message_content, $.fim_middle, $.message_content),
+    ),
 
     message: $ => seq($.im_start, $.role, '\n', $.message_content, $.im_end),
 
@@ -38,6 +36,9 @@ export default grammar({
       /[^<]+/, // be greedy with any other char (not <)
       /</ // force decision on single < which means it is allowed too just only one char at a time
     )),
+    fim_prefix: $ => token(constants.FIM_PREFIX),
+    fim_middle: $ => token(constants.FIM_MIDDLE),
+    fim_suffix: $ => token(constants.FIM_SUFFIX),
 
     im_start: $ => token(constants.IM_START),
     im_end: $ => token(constants.IM_END),
