@@ -21,7 +21,7 @@ export default grammar({
     $.repo_name_value,
     $.file_contents,
     $.file_name,
-    $.reasoning,
+    $.reasoning_inlined,
     $.think_section_inlined,
   ],
 
@@ -52,14 +52,13 @@ export default grammar({
 
     think_open_token: $ => token(constants.THINK_OPEN),
     think_close_token: $ => token(constants.THINK_CLOSE),
-    reasoning: $ => prec(-9, field("reasoning", $.text)),
+    reasoning_inlined: $ => prec(-9, field("reasoning", $.text)),
     think_section_inlined: $ => seq(
       $.think_open_token,
-      optional($.reasoning),
+      optional($.reasoning_inlined),
       $.think_close_token
     ),
 
-    // message_content: $ => repeat($.any), // TODO constrain this at all?
     message_content: $ => prec(-9, field("contents", $.text)),
 
     text: $ => repeat1(choice(
