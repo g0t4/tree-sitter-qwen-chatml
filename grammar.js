@@ -13,10 +13,6 @@ export default grammar({
   name: "qwen_chatml",
 
   inline: $ => [
-    $.role,
-    $.prefix,
-    $.suffix,
-    $.middle,
     $.file_name,
     $.think_section_inlined,
   ],
@@ -31,20 +27,19 @@ export default grammar({
     fim_file: $ => seq(
       // FIM does not require values to be provided for both prefix and suffix
       // - but, it wouldn't make much sense if neither are provided
-      $.fim_prefix_token, optional($.prefix),
-      $.fim_suffix_token, optional($.suffix),
-      $.fim_middle_token, optional($.middle),
+      $.fim_prefix_token, optional(prec(-9, field("prefix", $.text))),
+      $.fim_suffix_token, optional(prec(-9, field("suffix", $.text))),
+      $.fim_middle_token, optional(prec(-9, field("middle", $.text))),
     ),
 
     message: $ => seq($.im_start_token,
-      $.role,
+      field("role", $.until_end_of_line), // greedy, take until end of line
       '\n',
       optional($.think_section_inlined),
       prec(-9, field("contents", $.text)),
       $.im_end_token
     ),
 
-    role: $ => field("role", $.until_end_of_line), // greedy, take until end of line
 
     think_open_token: $ => token(constants.THINK_OPEN),
     think_close_token: $ => token(constants.THINK_CLOSE),
@@ -86,11 +81,8 @@ export default grammar({
 
 
     fim_prefix_token: $ => token(constants.FIM_PREFIX),
-    prefix: $ => prec(-9, field("prefix", $.text)),
     fim_suffix_token: $ => token(constants.FIM_SUFFIX),
-    suffix: $ => prec(-9, field("suffix", $.text)),
     fim_middle_token: $ => token(constants.FIM_MIDDLE),
-    middle: $ => prec(-9, field("middle", $.text)),
 
     im_start_token: $ => token(constants.IM_START),
     im_end_token: $ => token(constants.IM_END),
