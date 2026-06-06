@@ -16,12 +16,19 @@ export default grammar({
   inline: $ => [
     $.role,
     $.message_content,
+    $.prefix_content,
+    $.suffix_content,
+    $.middle_content,
   ],
 
   rules: {
     source_file: $ => choice(
       repeat($.message),
-      seq($.fim_prefix, $.message_content, $.fim_suffix, $.message_content, $.fim_middle, optional($.message_content)),
+      seq(
+        $.fim_prefix, $.prefix_content,
+        $.fim_suffix, $.suffix_content,
+        $.fim_middle, optional($.middle_content)
+      ),
     ),
 
     message: $ => seq($.im_start, $.role, '\n', $.message_content, $.im_end),
@@ -37,8 +44,11 @@ export default grammar({
       /</ // force decision on single < which means it is allowed too just only one char at a time
     )),
     fim_prefix: $ => token(constants.FIM_PREFIX),
-    fim_middle: $ => token(constants.FIM_MIDDLE),
+    prefix_content: $ => prec(-9, field("prefix_contents", $.text)),
     fim_suffix: $ => token(constants.FIM_SUFFIX),
+    suffix_content: $ => prec(-9, field("suffix_contents", $.text)),
+    fim_middle: $ => token(constants.FIM_MIDDLE),
+    middle_content: $ => prec(-9, field("middle_contents", $.text)),
 
     im_start: $ => token(constants.IM_START),
     im_end: $ => token(constants.IM_END),

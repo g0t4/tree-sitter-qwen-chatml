@@ -20,8 +20,8 @@ end
 ---
 (source_file
   (fim_prefix)
-  contents: (text)
+  prefix_contents: (text)
   (fim_suffix)
-  contents: (text)
+  suffix_contents: (text)
   (fim_middle)
-  contents: (text))
+  middle_contents: (text))
