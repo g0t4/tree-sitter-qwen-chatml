@@ -9,6 +9,10 @@ A tree-sitter parser for Qwen's raw prompt/completion format.
 # completion
 tree-sitter complete --shell fish > ~/.config/fish/completions/tree-sitter.fish
 
+# ensure parser is detected
+tree-sitter dump-languages
+# will show query types too like highlights
+
 # developing grammar
 tree-sitter generate
 tree-sitter build
