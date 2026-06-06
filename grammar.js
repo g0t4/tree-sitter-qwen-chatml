@@ -13,7 +13,6 @@ export default grammar({
   name: "qwen_chatml",
 
   inline: $ => [
-    $.file_name,
     $.think_section_inlined,
   ],
 
@@ -55,11 +54,11 @@ export default grammar({
     ),
 
 
+    until_end_of_line: $ => repeat1(/[^\n]+/), // until end of line
     text: $ => repeat1(choice(
       /[^<]+/, // be greedy with any other char (not <)
       /</ // force decision on single < which means it is allowed too just only one char at a time
     )),
-
 
     repo_name_token: $ => token(constants.REPO_NAME),
     repo_name: $ => seq(
@@ -68,11 +67,9 @@ export default grammar({
       "\n"
     ),
 
-    until_end_of_line: $ => repeat1(/[^\n]+/), // until end of line
-    file_name: $ => prec(-9, field("path", $.until_end_of_line)),
     repo_file: $ => seq(
       $.file_sep_token,
-      $.file_name,
+      prec(-9, field("path", $.until_end_of_line)),
       optional("\n"),
       optional(prec(-9, field("contents", $.text)))),
 
