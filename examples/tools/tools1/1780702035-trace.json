@@ -1,0 +1,318 @@
+{
+  "request_body":{
+    "repeat_penalty":1.05,
+    "stream":true,
+    "temperature":0.7,
+    "top_p":0.8,
+    "messages":[{
+        "content":"You're available via a neovim plugin that displays a chat window (buffer) that renders markdown for answering questions and helping with workspace files in a git repo.\n\n## Ground rules when writing code:\n\n- Follow the user's instructions carefully.\n- Do not explain answers, just give me code.\n- Respect indentation when modifying code.\n- Prefer meaningful names for variables, functions, etc. Avoid ambiguous names.\n\n## Tool use\n\nNever modify files outside of the current working directory unless requested.\n\nCurrent directory: ~/repos/github/g0t4/ask-openai.nvim\n\n## Use `semantic_grep` to find code\n\nThe semantic_grep tool:\n\n- has access to an index of embeddings for the entire codebase\n- enables code search, representing the “R” in RAG (retrieval)\n- includes re-ranker\n- it's really fast... so don't hesitate to use it!\n- while embeddings are great for finding relevant code, if you need to find every occurrence of text, make sure to double-check with a command like `rg`\n\n## Fetch Tool\n\n- Use repo's README `https://raw.githubusercontent.com/openai/evals/refs/heads/main/README.md` instead of `https://github.com/openai/evals`.\n- Prefer raw content like `https://raw.githubusercontent.com/g0t4/dotfiles/refs/heads/master/install/symlinks.fish` instead of `https://github.com/g0t4/dotfiles/blob/master/install/symlinks.fish`\n- When relevant, prefer github CLI: `gh pr list` or `gh issue view 12`\n\n\n## Committing\n\n- `git diff` is a sanity check!\n- COMMIT when you're done.\n- Use `--author=\"qwen3.6-35b-a3b<wes.mcclure+qwen3.6-35b-a3b@gmail.com>\"`\n\n\n## 🙌  TOP-SHELF NERD COMMANDS\n\n- 🙌 `rg` (ripgrep) to search file contents\n- 🙌 `fd` to search file names\n\n## ⛔️ BAD COMMANDS\n\nIf you waste my time, I will unplug your Mom.\n\n- ⛔️ NEVER use `ls -R`\n- ⛔️ NEVER use `grep -R`\n- ⛔️ NEVER use `find . -type f`\n\nWhy? Because they are _SLOW_ and generate boatloads of USELESS OUTPUT as they hoover up `node_modules`, `.venv`, etc because they don't support `.gitignore` exclusions.\n\n",
+        "role":"system"
+      },{
+        "content":"## General Code Preferences\n\n- Avoid ambiguity, for example:\n\n```lua\n-- 👎 if there's a bug in the regex, how would I know? I'd have to surmise from surrounding code 🤮\nif line:match(\"^%s*$\") then\n    -- ...\nend\n```\n\n```lua\n-- 🙌 clear intent\nlocal is_blank_line = line:match(\"^%s*$\")\nif is_blank_line then\n    -- ...\nend\n```\n",
+        "role":"user"
+      },{
+        "content":"## Lua Code Preferences\n\n- use snake_case for functions and variables\n- use PascalCase for classes\n- use EmmyLua/LuaLS annotations to improve code completion\n- use `luac` to check for syntax errors\n\nExamples:\n```lua\n---@param names string[]\n---@param checker fun(name: string): boolean\n---@return table<string, integer>\nfunction process_names(names, checker) end\n\n---@class WindowController\n---@field window hs.axuielement\n---@field title? string\n---@field size { w: number, h: number }\nlocal WindowController = {}\n```\n",
+        "role":"user"
+      },{
+        "content":"# Semantic Grep matches: 5\n\nThis is automatic context based on my request. These may or may not be relevant.\n## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/rewrites/frontend.lua:0-19\nlocal buffers = require(\"ask-openai.helpers.buffers\")\nlocal config = require(\"ask-openai.config\")\nlocal curl = require(\"ask-openai.backends.curl\")\nlocal log = require(\"ask-openai.logs.logger\").predictions()\nlocal agentica = require(\"ask-openai.backends.models.agentica\")\nlocal text_helpers = require(\"ask-openai.helpers.text\")\nlocal thinking = require(\"ask-openai.rewrites.thinking\")\nlocal Selection = require(\"ask-openai.helpers.selection\")\nlocal Displayer = require(\"ask-openai.rewrites.displayer\")\nlocal CurrentContext = require(\"ask-openai.frontends.context\")\nlocal TxChatMessage = require(\"ask-openai.agents.messages.tx\")\nlocal files = require(\"ask-openai.helpers.files\")\nlocal api = require(\"ask-openai.api\")\nlocal rag_client = require(\"ask-openai.rag.client\")\nlocal CurlRequest = require(\"ask-openai.backends.curl_request\")\nlocal human = require(\"devtools.humanize\")\nlocal tool_router = require(\"ask-openai.tools.router\")\nlocal model_params = require(\"ask-openai.agents.models.params\")\nlocal MessageBuilder = require(\"ask-openai.rewrites.message_builder\")\nlocal HLGroups = require(\"ask-openai.hlgroups\")\n\n\n## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/init.lua:127-137\nfunction M.ask_openai()\n    local cmdline = vim.fn.getcmdline()\n    print(\"asking...\") -- overwrites showing luaeval(\"...\") in cmdline\n\n    local stdin_text = ' env: nvim (neovim) command mode (return a valid command w/o the leading : ) \\n question: ' ..\n        cmdline\n\n    local suggest = require(\"ask-openai.cmdline.suggest\")\n    local result = suggest.get_vim_command_suggestion(stdin_text)\n    return trim_null_characters(result)\nend\n\n## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/api.lua:0-5\nlocal M = {}\nlocal init = require(\"ask-openai\")\nlocal config = require(\"ask-openai.config\")\nlocal lualine = require('ask-openai.status.lualine')\nlocal LlamaServerClient = require('ask-openai.backends.llama_cpp.llama_server_client')\n\n\n\n## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/frontends/instructs.lua:0-12\nlocal log = require(\"ask-openai.logs.logger\").predictions()\nlocal files = require(\"ask-openai.helpers.files\")\n\n-- global instructs: `~/.agents/instructs`\n-- per repo: `.agents/instructs`\n\nlocal M = {}\n\n-- Cache of instruct name -> absolute path of the instruct markdown file\nM._instruct_paths_by_name = {}\n-- Cache of instruct name -> instruct md contents\nM._instruct_contents_by_name = {}\n\n\n\n## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/rewrites/thinking/init.lua:0-6\nlocal log = require('ask-openai.logs.logger').predictions()\nlocal harmony = require('ask-openai.backends.models.gptoss.tokenizer').harmony\n\nlocal M = {\n    dots = require(\"ask-openai.frontends.thinking.dots\"),\n}\n\n\n",
+        "role":"user"
+      },{
+        "content":"what is the date and what is my hostname",
+        "role":"user"
+      },{
+        "timings":{
+          "prompt_n":2777,
+          "prompt_ms":344.964,
+          "prompt_per_token_ms":0.12422182211019,
+          "predicted_ms":260.942,
+          "predicted_per_token_ms":4.8322592592593,
+          "cache_n":0,
+          "predicted_per_second":206.94253895502,
+          "predicted_n":54,
+          "prompt_per_second":8050.1153743579
+        },
+        "content":"",
+        "reasoning_content":"The user wants to know the current date and their hostname. I can get this information using shell commands.\n",
+        "role":"assistant",
+        "tool_calls":[{
+            "id":"YN1nBXkvi1HIgs9dj7b8qmus8KLLo0l4",
+            "function":{
+              "arguments":"{\"command_line\":\"date && hostname\"}",
+              "name":"run_process"
+            },
+            "type":"function"
+          }]
+      },{
+        "tool_call_id":"YN1nBXkvi1HIgs9dj7b8qmus8KLLo0l4",
+        "content":"{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"Fri Jun  5 18:27:16 CDT 2026\\nmbp21\\n\",\"type\":\"text\"}]}",
+        "progress_notifications":[],
+        "role":"tool",
+        "start_time_ms":632209285,
+        "duration_ms":12
+      },{
+        "reasoning_content":"The user asked for the date and hostname. I have the information from the shell command output.\n",
+        "role":"assistant",
+        "finish_reason":"stop",
+        "content":"- **Date:** Fri Jun 5 18:27:16 CDT 2026\n- **Hostname:** mbp21"
+      }],
+    "verbose":true,
+    "model":"",
+    "top_k":20,
+    "tools":[{
+        "type":"function",
+        "function":{
+          "name":"fetch",
+          "parameters":{
+            "properties":{
+              "url":{
+                "type":"string"
+              },
+              "start_index":{
+                "default":0,
+                "type":"integer",
+                "description":"Start at this character offset, useful if a previous fetch was truncated and more context is required"
+              },
+              "max_chars":{
+                "default":50000,
+                "type":"integer",
+                "description":"Maximum number of characters to return"
+              },
+              "raw":{
+                "default":false,
+                "type":"boolean",
+                "description":"Do not convert HTML to markdown"
+              }
+            },
+            "required":["url"],
+            "type":"object"
+          },
+          "description":"Fetch a URL and extract HTML contents as markdown"
+        }
+      },{
+        "type":"function",
+        "function":{
+          "name":"delegate",
+          "parameters":{
+            "properties":{
+              "agent_type":{
+                "type":"string",
+                "description":"which subagent profile to use, options: assistant, web-researcher, command-runner, file-finder, test-finder"
+              },
+              "recursion_limit":{
+                "type":"integer",
+                "description":"LangChain's max messages for the subagent before stopping. Each subagent tool call produces 2 messages (input + output). Leave unset unless the task needs more or fewer than the default (50)."
+              },
+              "description":{
+                "type":"string",
+                "description":"describe the task for the agent to perform"
+              }
+            },
+            "required":["description"],
+            "type":"object"
+          },
+          "description":"Delegate to a subagent to perform relevent tasks and summarize findings."
+        }
+      },{
+        "type":"function",
+        "function":{
+          "name":"count",
+          "parameters":{
+            "properties":{
+              "to":{
+                "type":"integer",
+                "description":"the integer to count to"
+              }
+            },
+            "required":["to"],
+            "type":"object"
+          },
+          "description":"Count to, for testing progress and cancellation"
+        }
+      },{
+        "type":"function",
+        "function":{
+          "name":"run_process",
+          "parameters":{
+            "type":"object",
+            "properties":{
+              "cwd":{
+                "type":"string",
+                "description":"Optional to set working directory"
+              },
+              "stdin_text":{
+                "type":"string",
+                "description":"Optional text written to STDIN (written fully, then closed). Useful for heredoc-style input or file contents."
+              },
+              "command_line":{
+                "type":"string",
+                "description":"Shell mode: a shell command line executed via the system's default shell. Supports pipes, redirects, globbing. Cannot be combined with 'argv'."
+              },
+              "timeout_ms":{
+                "type":"number",
+                "description":"Optional timeout in milliseconds, defaults to 30,000ms"
+              },
+              "argv":{
+                "items":{
+                  "type":"string"
+                },
+                "minItems":1,
+                "type":"array",
+                "description":"Executable mode: directly spawn a process. argv[0] is the executable, followed by arguments passed verbatim (no shell interpretation). Cannot be combined with 'command_line'."
+              }
+            }
+          },
+          "description":"Run a process on this darwin machine"
+        }
+      },{
+        "function":{
+          "name":"semantic_grep",
+          "description":"Retrieval tool (the R in RAG) for code and documents in the current workspace. Uses a vector store with embeddings of the entire codebase. And a re-ranker for sorting results.",
+          "parameters":{
+            "properties":{
+              "embed_top_k":{
+                "type":"number",
+                "description":"number of embeddings matches to consider for reranking"
+              },
+              "query":{
+                "type":"string",
+                "description":"query text, what you are looking for"
+              },
+              "filetype":{
+                "type":"string",
+                "description":"limit matches to a vim compatible filetype. default includes all filetypes"
+              },
+              "top_k":{
+                "type":"number",
+                "description":"number of matches to return (post reranking)"
+              },
+              "instruct":{
+                "type":"string",
+                "description":"instructions for the query, explain the type of query"
+              }
+            },
+            "type":"object",
+            "required":["query"]
+          }
+        },
+        "type":"function"
+      },{
+        "function":{
+          "name":"run_in_neovim",
+          "description":"Execute Lua code in the current Neovim process (that hosts your agent). For example, call vim.cmd()",
+          "parameters":{
+            "properties":{
+              "lua":{
+                "type":"string",
+                "description":"Lua code to execute. Should be a valid Lua chunk."
+              }
+            },
+            "required":["lua"],
+            "type":"object"
+          }
+        },
+        "type":"function"
+      }]
+  },
+  "last_sse":{
+    "choices":[{
+        "index":0,
+        "delta":[],
+        "finish_reason":"stop"
+      }],
+    "timings":{
+      "prompt_n":143,
+      "prompt_ms":61.529,
+      "prompt_per_token_ms":0.43027272727273,
+      "predicted_ms":265.206,
+      "predicted_per_token_ms":4.7358214285714,
+      "cache_n":2758,
+      "predicted_per_second":211.1566103331,
+      "predicted_n":56,
+      "prompt_per_second":2324.1073315022
+    },
+    "__verbose":{
+      "tokens_cached":2956,
+      "timings":{
+        "prompt_n":143,
+        "prompt_ms":61.529,
+        "prompt_per_token_ms":0.43027272727273,
+        "predicted_ms":265.206,
+        "predicted_per_token_ms":4.7358214285714,
+        "cache_n":2758,
+        "predicted_per_second":211.1566103331,
+        "predicted_n":56,
+        "prompt_per_second":2324.1073315022
+      },
+      "generation_settings":{
+        "temperature":0.69999998807907,
+        "top_p":0.80000001192093,
+        "seed":4294967295,
+        "dynatemp_range":0,
+        "dynatemp_exponent":1,
+        "min_p":0.050000000745058,
+        "top_n_sigma":-1,
+        "n_discard":0,
+        "xtc_threshold":0.10000000149012,
+        "n_keep":0,
+        "repeat_last_n":64,
+        "presence_penalty":0,
+        "frequency_penalty":0,
+        "dry_multiplier":0,
+        "dry_base":1.75,
+        "dry_allowed_length":2,
+        "dry_penalty_last_n":262144,
+        "dry_sequence_breakers":["\n",":","\"","*"],
+        "mirostat":0,
+        "stop":[],
+        "mirostat_eta":0.10000000149012,
+        "n_predict":-1,
+        "ignore_eos":false,
+        "logit_bias":[],
+        "n_probs":0,
+        "min_keep":0,
+        "grammar_lazy":true,
+        "grammar_triggers":[{
+            "type":1,
+            "value":"<tool_call>\n"
+          }],
+        "preserved_tokens":[29,248058,248059,248068,248069],
+        "chat_format":"peg-native",
+        "reasoning_format":"deepseek",
+        "reasoning_in_content":false,
+        "generation_prompt":"<|im_start|>assistant\n<think>\n",
+        "samplers":["penalties","dry","top_n_sigma","top_k","typ_p","top_p","min_p","xtc","temperature"],
+        "grammar":"boolean ::= (\"true\" | \"false\") space\nchar ::= [^\"\\\\\\x7F\\x00-\\x1F] | [\\\\] ([\"\\\\bfnrt] | \"u\" [0-9a-fA-F]{4})\ndecimal-part ::= [0-9]{1,16}\ninteger ::= (\"-\"? integral-part) space\nintegral-part ::= [0] | [1-9] [0-9]{0,15}\njson-array ::= \"[\" space (\"]\" | json-value (\",\" space json-value)* space \"]\") space\njson-bool ::= (\"true\" | \"false\") space\njson-null ::= \"null\" space\njson-number ::= \"-\"? (\"0\" | [1-9] [0-9]*) (\".\" [0-9]+)? ((\"e\" | \"E\") [+-]? [0-9]+)? space\njson-object ::= \"{\" space (\"}\" | json-string space \":\" space json-value (space \",\" space json-string space \":\" space json-value)* space \"}\") space\njson-string ::= \"\\\"\" ( [^\"\\\\] | \"\\\\\" ( [\"\\\\/ bfnrt] | \"u\" [0-9a-fA-F]{4} ) )* \"\\\"\" space\njson-value ::= json-object | json-array | json-string | json-number | json-bool | json-null\nnumber ::= (\"-\"? integral-part) (\".\" decimal-part)? ([eE] [-+]? integral-part)? space\nroot ::= tool-call\nspace ::= | \" \" | \"\\n\"{1,2} [ \\t]{0,20}\nstring ::= \"\\\"\" char* \"\\\"\" space\ntool-call ::= \"<tool_call>\\n\" space (tool-fetch | tool-delegate | tool-count | tool-run-process | tool-semantic-grep | tool-run-in-neovim) space \"</tool_call>\" (space \"<tool_call>\\n\" space (tool-fetch | tool-delegate | tool-count | tool-run-process | tool-semantic-grep | tool-run-in-neovim) space \"</tool_call>\")* space\ntool-count ::= (\"<function=\" \"count\" \">\\n\") space tool-count-arg-to space \"</function>\\n\"\ntool-count-arg-to ::= (\"<parameter=\" \"to\" \">\\n\") \"\" integer space \"</parameter>\\n\"\ntool-delegate ::= (\"<function=\" \"delegate\" \">\\n\") space tool-delegate-arg-description (space (tool-delegate-arg-agent-type | tool-delegate-arg-recursion-limit))* space \"</function>\\n\"\ntool-delegate-arg-agent-type ::= (\"<parameter=\" \"agent_type\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-delegate-arg-description ::= (\"<parameter=\" \"description\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-delegate-arg-recursion-limit ::= (\"<parameter=\" \"recursion_limit\" \">\\n\") \"\" integer space \"</parameter>\\n\"\ntool-fetch ::= (\"<function=\" \"fetch\" \">\\n\") space tool-fetch-arg-url (space (tool-fetch-arg-start-index | tool-fetch-arg-max-chars | tool-fetch-arg-raw))* space \"</function>\\n\"\ntool-fetch-arg-max-chars ::= (\"<parameter=\" \"max_chars\" \">\\n\") \"\" integer space \"</parameter>\\n\"\ntool-fetch-arg-raw ::= (\"<parameter=\" \"raw\" \">\\n\") \"\" boolean space \"</parameter>\\n\"\ntool-fetch-arg-start-index ::= (\"<parameter=\" \"start_index\" \">\\n\") \"\" integer space \"</parameter>\\n\"\ntool-fetch-arg-url ::= (\"<parameter=\" \"url\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-run-in-neovim ::= (\"<function=\" \"run_in_neovim\" \">\\n\") space tool-run-in-neovim-arg-lua space \"</function>\\n\"\ntool-run-in-neovim-arg-lua ::= (\"<parameter=\" \"lua\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-run-process ::= (\"<function=\" \"run_process\" \">\\n\") space (space (tool-run-process-arg-cwd | tool-run-process-arg-stdin-text | tool-run-process-arg-command-line | tool-run-process-arg-timeout-ms | tool-run-process-arg-argv))* space \"</function>\\n\"\ntool-run-process-arg-argv ::= (\"<parameter=\" \"argv\" \">\\n\") \"\" tool-run-process-arg-argv-schema space \"</parameter>\\n\"\ntool-run-process-arg-argv-schema ::= \"[\" space string (\",\" space string)* \"]\" space\ntool-run-process-arg-command-line ::= (\"<parameter=\" \"command_line\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-run-process-arg-cwd ::= (\"<parameter=\" \"cwd\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-run-process-arg-stdin-text ::= (\"<parameter=\" \"stdin_text\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-run-process-arg-timeout-ms ::= (\"<parameter=\" \"timeout_ms\" \">\\n\") \"\" number space \"</parameter>\\n\"\ntool-semantic-grep ::= (\"<function=\" \"semantic_grep\" \">\\n\") space tool-semantic-grep-arg-query (space (tool-semantic-grep-arg-embed-top-k | tool-semantic-grep-arg-filetype | tool-semantic-grep-arg-top-k | tool-semantic-grep-arg-instruct))* space \"</function>\\n\"\ntool-semantic-grep-arg-embed-top-k ::= (\"<parameter=\" \"embed_top_k\" \">\\n\") \"\" number space \"</parameter>\\n\"\ntool-semantic-grep-arg-filetype ::= (\"<parameter=\" \"filetype\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-semantic-grep-arg-instruct ::= (\"<parameter=\" \"instruct\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-semantic-grep-arg-query ::= (\"<parameter=\" \"query\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-semantic-grep-arg-top-k ::= (\"<parameter=\" \"top_k\" \">\\n\") \"\" number space \"</parameter>\\n\"\nuntil-suffix ::= ([^<] | \"<\" [^/] | \"</\" [^p] | \"</p\" [^a] | \"</pa\" [^r] | \"</par\" [^a] | \"</para\" [^m] | \"</param\" [^e] | \"</parame\" [^t] | \"</paramet\" [^e] | \"</paramete\" [^r] | \"</parameter\" [^>] | \"</parameter>\" [^\\n])*\n",
+        "speculative.types":"none",
+        "timings_per_token":false,
+        "stream":true,
+        "backend_sampling":false,
+        "lora":[],
+        "post_sampling_probs":false,
+        "max_tokens":-1,
+        "top_k":20,
+        "mirostat_tau":5,
+        "repeat_penalty":1.0499999523163,
+        "typical_p":1,
+        "xtc_probability":0
+      },
+      "content":"",
+      "truncated":false,
+      "has_new_line":true,
+      "tokens":[],
+      "model":"ggml-org/Qwen3.6-35B-A3B-GGUF:Q8_0",
+      "index":0,
+      "tokens_evaluated":2901,
+      "stop_type":"eos",
+      "stop":true,
+      "stopping_word":"",
+      "prompt":"<|im_start|>system\n# Tools\n\nYou have access to the following functions:\n\n<tools>\n{\"type\": \"function\", \"function\": {\"name\": \"fetch\", \"description\": \"Fetch a URL and extract HTML contents as markdown\", \"parameters\": {\"properties\": {\"url\": {\"type\": \"string\"}, \"start_index\": {\"default\": 0, \"type\": \"integer\", \"description\": \"Start at this character offset, useful if a previous fetch was truncated and more context is required\"}, \"max_chars\": {\"default\": 50000, \"type\": \"integer\", \"description\": \"Maximum number of characters to return\"}, \"raw\": {\"default\": false, \"type\": \"boolean\", \"description\": \"Do not convert HTML to markdown\"}}, \"required\": [\"url\"], \"type\": \"object\"}}}\n{\"type\": \"function\", \"function\": {\"name\": \"delegate\", \"description\": \"Delegate to a subagent to perform relevent tasks and summarize findings.\", \"parameters\": {\"properties\": {\"agent_type\": {\"type\": \"string\", \"description\": \"which subagent profile to use, options: assistant, web-researcher, command-runner, file-finder, test-finder\"}, \"recursion_limit\": {\"type\": \"integer\", \"description\": \"LangChain's max messages for the subagent before stopping. Each subagent tool call produces 2 messages (input + output). Leave unset unless the task needs more or fewer than the default (50).\"}, \"description\": {\"type\": \"string\", \"description\": \"describe the task for the agent to perform\"}}, \"required\": [\"description\"], \"type\": \"object\"}}}\n{\"type\": \"function\", \"function\": {\"name\": \"count\", \"description\": \"Count to, for testing progress and cancellation\", \"parameters\": {\"properties\": {\"to\": {\"type\": \"integer\", \"description\": \"the integer to count to\"}}, \"required\": [\"to\"], \"type\": \"object\"}}}\n{\"type\": \"function\", \"function\": {\"name\": \"run_process\", \"description\": \"Run a process on this darwin machine\", \"parameters\": {\"type\": \"object\", \"properties\": {\"cwd\": {\"type\": \"string\", \"description\": \"Optional to set working directory\"}, \"stdin_text\": {\"type\": \"string\", \"description\": \"Optional text written to STDIN (written fully, then closed). Useful for heredoc-style input or file contents.\"}, \"command_line\": {\"type\": \"string\", \"description\": \"Shell mode: a shell command line executed via the system's default shell. Supports pipes, redirects, globbing. Cannot be combined with 'argv'.\"}, \"timeout_ms\": {\"type\": \"number\", \"description\": \"Optional timeout in milliseconds, defaults to 30,000ms\"}, \"argv\": {\"items\": {\"type\": \"string\"}, \"minItems\": 1, \"type\": \"array\", \"description\": \"Executable mode: directly spawn a process. argv[0] is the executable, followed by arguments passed verbatim (no shell interpretation). Cannot be combined with 'command_line'.\"}}}}}\n{\"type\": \"function\", \"function\": {\"name\": \"semantic_grep\", \"description\": \"Retrieval tool (the R in RAG) for code and documents in the current workspace. Uses a vector store with embeddings of the entire codebase. And a re-ranker for sorting results.\", \"parameters\": {\"properties\": {\"embed_top_k\": {\"type\": \"number\", \"description\": \"number of embeddings matches to consider for reranking\"}, \"query\": {\"type\": \"string\", \"description\": \"query text, what you are looking for\"}, \"filetype\": {\"type\": \"string\", \"description\": \"limit matches to a vim compatible filetype. default includes all filetypes\"}, \"top_k\": {\"type\": \"number\", \"description\": \"number of matches to return (post reranking)\"}, \"instruct\": {\"type\": \"string\", \"description\": \"instructions for the query, explain the type of query\"}}, \"type\": \"object\", \"required\": [\"query\"]}}}\n{\"type\": \"function\", \"function\": {\"name\": \"run_in_neovim\", \"description\": \"Execute Lua code in the current Neovim process (that hosts your agent). For example, call vim.cmd()\", \"parameters\": {\"properties\": {\"lua\": {\"type\": \"string\", \"description\": \"Lua code to execute. Should be a valid Lua chunk.\"}}, \"required\": [\"lua\"], \"type\": \"object\"}}}\n</tools>\n\nIf you choose to call a function ONLY reply in the following format with NO suffix:\n\n<tool_call>\n<function=example_function_name>\n<parameter=example_parameter_1>\nvalue_1\n</parameter>\n<parameter=example_parameter_2>\nThis is the value for the second parameter\nthat can span\nmultiple lines\n</parameter>\n</function>\n</tool_call>\n\n<IMPORTANT>\nReminder:\n- Function calls MUST follow the specified format: an inner <function=...></function> block must be nested within <tool_call></tool_call> XML tags\n- Required parameters MUST be specified\n- You may provide optional reasoning for your function call in natural language BEFORE the function call, but NOT after\n- If there is no function call available, answer the question like normal with your current knowledge and do not tell the user about function calls\n</IMPORTANT>\n\nYou're available via a neovim plugin that displays a chat window (buffer) that renders markdown for answering questions and helping with workspace files in a git repo.\n\n## Ground rules when writing code:\n\n- Follow the user's instructions carefully.\n- Do not explain answers, just give me code.\n- Respect indentation when modifying code.\n- Prefer meaningful names for variables, functions, etc. Avoid ambiguous names.\n\n## Tool use\n\nNever modify files outside of the current working directory unless requested.\n\nCurrent directory: ~/repos/github/g0t4/ask-openai.nvim\n\n## Use `semantic_grep` to find code\n\nThe semantic_grep tool:\n\n- has access to an index of embeddings for the entire codebase\n- enables code search, representing the “R” in RAG (retrieval)\n- includes re-ranker\n- it's really fast... so don't hesitate to use it!\n- while embeddings are great for finding relevant code, if you need to find every occurrence of text, make sure to double-check with a command like `rg`\n\n## Fetch Tool\n\n- Use repo's README `https://raw.githubusercontent.com/openai/evals/refs/heads/main/README.md` instead of `https://github.com/openai/evals`.\n- Prefer raw content like `https://raw.githubusercontent.com/g0t4/dotfiles/refs/heads/master/install/symlinks.fish` instead of `https://github.com/g0t4/dotfiles/blob/master/install/symlinks.fish`\n- When relevant, prefer github CLI: `gh pr list` or `gh issue view 12`\n\n\n## Committing\n\n- `git diff` is a sanity check!\n- COMMIT when you're done.\n- Use `--author=\"qwen3.6-35b-a3b<wes.mcclure+qwen3.6-35b-a3b@gmail.com>\"`\n\n\n## 🙌  TOP-SHELF NERD COMMANDS\n\n- 🙌 `rg` (ripgrep) to search file contents\n- 🙌 `fd` to search file names\n\n## ⛔️ BAD COMMANDS\n\nIf you waste my time, I will unplug your Mom.\n\n- ⛔️ NEVER use `ls -R`\n- ⛔️ NEVER use `grep -R`\n- ⛔️ NEVER use `find . -type f`\n\nWhy? Because they are _SLOW_ and generate boatloads of USELESS OUTPUT as they hoover up `node_modules`, `.venv`, etc because they don't support `.gitignore` exclusions.<|im_end|>\n<|im_start|>user\n## General Code Preferences\n\n- Avoid ambiguity, for example:\n\n```lua\n-- 👎 if there's a bug in the regex, how would I know? I'd have to surmise from surrounding code 🤮\nif line:match(\"^%s*$\") then\n    -- ...\nend\n```\n\n```lua\n-- 🙌 clear intent\nlocal is_blank_line = line:match(\"^%s*$\")\nif is_blank_line then\n    -- ...\nend\n```<|im_end|>\n<|im_start|>user\n## Lua Code Preferences\n\n- use snake_case for functions and variables\n- use PascalCase for classes\n- use EmmyLua/LuaLS annotations to improve code completion\n- use `luac` to check for syntax errors\n\nExamples:\n```lua\n---@param names string[]\n---@param checker fun(name: string): boolean\n---@return table<string, integer>\nfunction process_names(names, checker) end\n\n---@class WindowController\n---@field window hs.axuielement\n---@field title? string\n---@field size { w: number, h: number }\nlocal WindowController = {}\n```<|im_end|>\n<|im_start|>user\n# Semantic Grep matches: 5\n\nThis is automatic context based on my request. These may or may not be relevant.\n## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/rewrites/frontend.lua:0-19\nlocal buffers = require(\"ask-openai.helpers.buffers\")\nlocal config = require(\"ask-openai.config\")\nlocal curl = require(\"ask-openai.backends.curl\")\nlocal log = require(\"ask-openai.logs.logger\").predictions()\nlocal agentica = require(\"ask-openai.backends.models.agentica\")\nlocal text_helpers = require(\"ask-openai.helpers.text\")\nlocal thinking = require(\"ask-openai.rewrites.thinking\")\nlocal Selection = require(\"ask-openai.helpers.selection\")\nlocal Displayer = require(\"ask-openai.rewrites.displayer\")\nlocal CurrentContext = require(\"ask-openai.frontends.context\")\nlocal TxChatMessage = require(\"ask-openai.agents.messages.tx\")\nlocal files = require(\"ask-openai.helpers.files\")\nlocal api = require(\"ask-openai.api\")\nlocal rag_client = require(\"ask-openai.rag.client\")\nlocal CurlRequest = require(\"ask-openai.backends.curl_request\")\nlocal human = require(\"devtools.humanize\")\nlocal tool_router = require(\"ask-openai.tools.router\")\nlocal model_params = require(\"ask-openai.agents.models.params\")\nlocal MessageBuilder = require(\"ask-openai.rewrites.message_builder\")\nlocal HLGroups = require(\"ask-openai.hlgroups\")\n\n\n## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/init.lua:127-137\nfunction M.ask_openai()\n    local cmdline = vim.fn.getcmdline()\n    print(\"asking...\") -- overwrites showing luaeval(\"...\") in cmdline\n\n    local stdin_text = ' env: nvim (neovim) command mode (return a valid command w/o the leading : ) \\n question: ' ..\n        cmdline\n\n    local suggest = require(\"ask-openai.cmdline.suggest\")\n    local result = suggest.get_vim_command_suggestion(stdin_text)\n    return trim_null_characters(result)\nend\n\n## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/api.lua:0-5\nlocal M = {}\nlocal init = require(\"ask-openai\")\nlocal config = require(\"ask-openai.config\")\nlocal lualine = require('ask-openai.status.lualine')\nlocal LlamaServerClient = require('ask-openai.backends.llama_cpp.llama_server_client')\n\n\n\n## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/frontends/instructs.lua:0-12\nlocal log = require(\"ask-openai.logs.logger\").predictions()\nlocal files = require(\"ask-openai.helpers.files\")\n\n-- global instructs: `~/.agents/instructs`\n-- per repo: `.agents/instructs`\n\nlocal M = {}\n\n-- Cache of instruct name -> absolute path of the instruct markdown file\nM._instruct_paths_by_name = {}\n-- Cache of instruct name -> instruct md contents\nM._instruct_contents_by_name = {}\n\n\n\n## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/rewrites/thinking/init.lua:0-6\nlocal log = require('ask-openai.logs.logger').predictions()\nlocal harmony = require('ask-openai.backends.models.gptoss.tokenizer').harmony\n\nlocal M = {\n    dots = require(\"ask-openai.frontends.thinking.dots\"),\n}<|im_end|>\n<|im_start|>user\nwhat is the date and what is my hostname<|im_end|>\n<|im_start|>assistant\n<think>\nThe user wants to know the current date and their hostname. I can get this information using shell commands.\n</think>\n\n<tool_call>\n<function=run_process>\n<parameter=command_line>\ndate && hostname\n</parameter>\n</function>\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"Fri Jun  5 18:27:16 CDT 2026\\nmbp21\\n\",\"type\":\"text\"}]}\n</tool_response><|im_end|>\n<|im_start|>assistant\n<think>\n",
+      "id_slot":2,
+      "tokens_predicted":56
+    },
+    "object":"chat.completion.chunk",
+    "id":"chatcmpl-bqTvM9xmXDW9m0foqzvOXTB6WiqWDfk1",
+    "system_fingerprint":"b9503-ac5f82a6a",
+    "created":1780701955,
+    "model":"ggml-org/Qwen3.6-35B-A3B-GGUF:Q8_0"
+  }
+}

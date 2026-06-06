@@ -1,0 +1,588 @@
+{
+  "request_body":{
+    "top_p":0.8,
+    "top_k":20,
+    "verbose":true,
+    "tools":[{
+        "function":{
+          "description":"Run a process on this darwin machine",
+          "parameters":{
+            "properties":{
+              "timeout_ms":{
+                "description":"Optional timeout in milliseconds, defaults to 30,000ms",
+                "type":"number"
+              },
+              "argv":{
+                "minItems":1,
+                "description":"Executable mode: directly spawn a process. argv[0] is the executable, followed by arguments passed verbatim (no shell interpretation). Cannot be combined with 'command_line'.",
+                "items":{
+                  "type":"string"
+                },
+                "type":"array"
+              },
+              "stdin_text":{
+                "description":"Optional text written to STDIN (written fully, then closed). Useful for heredoc-style input or file contents.",
+                "type":"string"
+              },
+              "cwd":{
+                "description":"Optional to set working directory",
+                "type":"string"
+              },
+              "command_line":{
+                "description":"Shell mode: a shell command line executed via the system's default shell. Supports pipes, redirects, globbing. Cannot be combined with 'argv'.",
+                "type":"string"
+              }
+            },
+            "type":"object"
+          },
+          "name":"run_process"
+        },
+        "type":"function"
+      },{
+        "function":{
+          "description":"Count to, for testing progress and cancellation",
+          "parameters":{
+            "properties":{
+              "to":{
+                "description":"the integer to count to",
+                "type":"integer"
+              }
+            },
+            "required":["to"],
+            "type":"object"
+          },
+          "name":"count"
+        },
+        "type":"function"
+      },{
+        "function":{
+          "description":"Fetch a URL and extract HTML contents as markdown",
+          "parameters":{
+            "properties":{
+              "url":{
+                "type":"string"
+              },
+              "max_chars":{
+                "description":"Maximum number of characters to return",
+                "default":50000,
+                "type":"integer"
+              },
+              "raw":{
+                "description":"Do not convert HTML to markdown",
+                "default":false,
+                "type":"boolean"
+              },
+              "start_index":{
+                "description":"Start at this character offset, useful if a previous fetch was truncated and more context is required",
+                "default":0,
+                "type":"integer"
+              }
+            },
+            "required":["url"],
+            "type":"object"
+          },
+          "name":"fetch"
+        },
+        "type":"function"
+      },{
+        "function":{
+          "description":"Delegate to a subagent to perform relevent tasks and summarize findings.",
+          "parameters":{
+            "properties":{
+              "description":{
+                "description":"describe the task for the agent to perform",
+                "type":"string"
+              },
+              "recursion_limit":{
+                "description":"LangChain's max messages for the subagent before stopping. Each subagent tool call produces 2 messages (input + output). Leave unset unless the task needs more or fewer than the default (50).",
+                "type":"integer"
+              },
+              "agent_type":{
+                "description":"which subagent profile to use, options: assistant, web-researcher, command-runner, file-finder, test-finder",
+                "type":"string"
+              }
+            },
+            "required":["description"],
+            "type":"object"
+          },
+          "name":"delegate"
+        },
+        "type":"function"
+      },{
+        "type":"function",
+        "function":{
+          "description":"Retrieval tool (the R in RAG) for code and documents in the current workspace. Uses a vector store with embeddings of the entire codebase. And a re-ranker for sorting results.",
+          "parameters":{
+            "type":"object",
+            "required":["query"],
+            "properties":{
+              "top_k":{
+                "description":"number of matches to return (post reranking)",
+                "type":"number"
+              },
+              "embed_top_k":{
+                "description":"number of embeddings matches to consider for reranking",
+                "type":"number"
+              },
+              "query":{
+                "description":"query text, what you are looking for",
+                "type":"string"
+              },
+              "filetype":{
+                "description":"limit matches to a vim compatible filetype. default includes all filetypes",
+                "type":"string"
+              },
+              "instruct":{
+                "description":"instructions for the query, explain the type of query",
+                "type":"string"
+              }
+            }
+          },
+          "name":"semantic_grep"
+        }
+      },{
+        "type":"function",
+        "function":{
+          "description":"Execute Lua code in the current Neovim process (that hosts your agent). For example, call vim.cmd()",
+          "parameters":{
+            "type":"object",
+            "required":["lua"],
+            "properties":{
+              "lua":{
+                "description":"Lua code to execute. Should be a valid Lua chunk.",
+                "type":"string"
+              }
+            }
+          },
+          "name":"run_in_neovim"
+        }
+      }],
+    "stream":true,
+    "messages":[{
+        "content":"You're available via a neovim plugin that displays a chat window (buffer) that renders markdown for answering questions and helping with workspace files in a git repo.\n\n## Ground rules when writing code:\n\n- Follow the user's instructions carefully.\n- Do not explain answers, just give me code.\n- Respect indentation when modifying code.\n- Prefer meaningful names for variables, functions, etc. Avoid ambiguous names.\n\n## Tool use\n\nNever modify files outside of the current working directory unless requested.\n\nCurrent directory: ~/repos/github/g0t4/dotfiles\n\n## Use `semantic_grep` to find code\n\nThe semantic_grep tool:\n\n- has access to an index of embeddings for the entire codebase\n- enables code search, representing the “R” in RAG (retrieval)\n- includes re-ranker\n- it's really fast... so don't hesitate to use it!\n- while embeddings are great for finding relevant code, if you need to find every occurrence of text, make sure to double-check with a command like `rg`\n\n## Committing\n\n- `git diff` is a sanity check!\n- COMMIT when you're done.\n- Use `--author=\"qwen3.6-35b-a3b<wes.mcclure+qwen3.6-35b-a3b@gmail.com>\"`\n\n\n## 🙌  TOP-SHELF NERD COMMANDS\n\n- 🙌 `rg` (ripgrep) to search file contents\n- 🙌 `fd` to search file names\n\n## ⛔️ BAD COMMANDS\n\nIf you waste my time, I will unplug your Mom.\n\n- ⛔️ NEVER use `ls -R`\n- ⛔️ NEVER use `grep -R`\n- ⛔️ NEVER use `find . -type f`\n\nWhy? Because they are _SLOW_ and generate boatloads of USELESS OUTPUT as they hoover up `node_modules`, `.venv`, etc because they don't support `.gitignore` exclusions.\n\n\n## Fetch Tool\n\n- Use repo's README `https://raw.githubusercontent.com/openai/evals/refs/heads/main/README.md` instead of `https://github.com/openai/evals`.\n- Prefer raw content like `https://raw.githubusercontent.com/g0t4/dotfiles/refs/heads/master/install/symlinks.fish` instead of `https://github.com/g0t4/dotfiles/blob/master/install/symlinks.fish`\n- When relevant, prefer github CLI: `gh pr list` or `gh issue view 12`\n\n",
+        "role":"system"
+      },{
+        "content":"## General Code Preferences\n\n- Avoid ambiguity, for example:\n\n```lua\n-- 👎 if there's a bug in the regex, how would I know? I'd have to surmise from surrounding code 🤮\nif line:match(\"^%s*$\") then\n    -- ...\nend\n```\n\n```lua\n-- 🙌 clear intent\nlocal is_blank_line = line:match(\"^%s*$\")\nif is_blank_line then\n    -- ...\nend\n```\n",
+        "role":"user"
+      },{
+        "content":"## Fish Shell Code Preferences\n\n- Use snake_case for functions and variables.\n- When a condition is ambiguous, assign it to a well‑named variable before the `if`.\n- Prefer long options, i.e. `--quiet` over `-q`, `--regex` over `-r`\n- Fish shell does not do word splitting like bash, no need to wrap everything in quotes!\n\n## Fish syntax examples\n\n```fish\n# exploit fish-isms!\n\n# use `not`, avoid `!`\nif not test -f spoon\n    echo There is no spoon\n    exit 1\nend\n\n# if + set\nif set -l message (some_command)\n    echo \"ok: $message\"\nelse\n    echo \"fail: $message\"\nend\n\n# prefer named arguments\nfunction show_variable --argument-names name value\n    echo \"$name = $value\"\nend\n\n# fish doesn't have heredocs, use begin/end\nbegin\n    echo $header\n    echo $table\nend > out.html\n# or multi-line strings\necho \"\nfoo\nbar\n\" > test\n\n# every variable is an array\nset names wes john bob jane\nfor name in $names\n    echo $name\nend\n\nfor i in *.tmp\n    if grep DONE $i\n        break\n    end\n    if grep SKIP $i\n        continue\n    end\n    ...\nend\n\n# combine conditions\nwhile test -f foo.txt; or test -f bar.txt\n    ...\nend\n\n# conditional execution\nmake; and make install; or make clean\n```\n\n### builtin fish commands\n\nNow that we have more than 2KB of system RAM, we can fix most of what sucks about bash...\n\n```fish\n# *** string command\n\n# match: test, filter, extract\nstring match --quiet '*.lua' $file\nset lua_files (string match '*.lua' $files)\nset version (string match --regex 'v([0-9.]+)' $tag)\nstring match --index --regex 'ERROR' $line\n\n# replace: transform text\nset fixed (string replace foo bar $text)\nset cleaned (string replace --regex '\\s+' ' ' $line)\nset base (string replace --regex '\\.[^.]+$' '' $file)\nset normalized (string replace --filter --regex '^./' '' $paths)\n\n# split: tokenize\nset parts (string split ':' $PATH)\nset lines (string split '\\n' $text)\nset ext (string split --right --max 1 . $file)[2]\n\n# trim: clean edges\nset clean (string trim $line)\nset unquoted (string trim --chars '\"' $s)\n\n# join: build strings\nstring join ' ' $argv\nstring join --no-empty ':' $PATH\n\n# length and slicing\nstring length $name\nstring sub --start 2 --length 4 $word\nstring sub --start -5 $word\n\n# case conversion\nset key (string lower $key)\nset name (string upper $name)\n\n# shell-safe encoding\nset escaped (string escape $path)\nstring unescape $escaped\n\n# normalize piped output\nset text (some_command | string collect)\n\n\n# path command\npath basename foo/bar.txt # bar.txt\npath basename --no-extension foo/bar.txt # bar\npath dirname foo/bar.txt # foo\npath extension ./foo.mp4 # .mp4\npath change-extension mov ./foo.mp4 # ./foo.mov\n\npath normalize path/to//hello.txt # path/to/hello.txt\npath normalize path/to/../hello.txt # path/hello.txt\n# resolve = normalize + absolute path and follow symlinks\npath resolve foo  # ~/foo\n\npath sort 10-foo 2-bar\n# 2-bar\n# 10-foo\n\n\n# math command\nmath [(-s | --scale) N] [(-b | --base) BASE] [(-m | --scale-mode) MODE] EXPRESSION ...\nmath 10 / 6\nmath $status - 128\nmath \"5 * 2\"\nmath \"sin(pi)\"\nmath max 5,2,3,1\n\n\n# count STRING1 STRING2 ...\n# COMMAND | count\n# count [...] < FILE\ncount $PATH\ncount *.txt\ngit ls-files --others --exclude-standard | count\nprintf '%s\\n' foo bar | count baz # Returns 3 (2 lines from stdin plus 1 argument)\ncount < /etc/hosts # number of entries in hosts file\n\n\n# contains [OPTIONS] KEY [VALUES ...]\nif contains -- -q $argv\n    echo '$argv contains a -q option'\nend\n\n# scripts\nstatus filename # current running script\nstatus basename\nstatus dirname\nstatus function # current function name\nstatus line-number\nstatus stack-trace\n\n```\n",
+        "role":"user"
+      },{
+        "content":"# Semantic Grep matches: 5\n\nThis is automatic context based on my request. These may or may not be relevant.\n## ~/repos/github/g0t4/dotfiles/fish/config/config.fish:15-34\nset -g WES_DOTFILES \"$WES_REPOS/github/g0t4/dotfiles\"\nexport WES_DOTFILES=$WES_DOTFILES\n\n# ** load_first\nif status is-interactive\n    for file in $WES_DOTFILES/fish/load_first/interactive_only/*.fish\n        source $file\n    end\nend\n# non-interactive scripts\nfor file in $WES_DOTFILES/fish/load_first/*.fish\n    source $file\nend\n\n# * zsh compat\nif status is-interactive\n    # largely abbrs, a few env vars that might need moved... so, defensively load these interactive only\n    for file in $WES_DOTFILES/zsh/compat_fish/*.zsh\n        source $file\n    end\n\n\n## ~/repos/github/g0t4/dotfiles/fish/load_last_interactive_only/files-specific.fish:30-49\n# cd-\nabbr --add cd- 'cd -'\n\n# TODO impl cp-  or cph (like dirh, interactive to pick recent dir?)\n#   see dir stack / history : https://fishshell.com/docs/current/interactive.html#id13\n# function _cp-\n#     echo cp \"$dirprev\"\n# end\n#\n# abbr --add cp- --regex 'cp-' --function _cp-\n\n## *** ask-openai related\n\nabbr ask_status \"git -C (z --echo dotfiles) status; git -C (z --echo ask-openai.nvim) status; git -C (z --echo devtools.nvim) status\"\n\n## *** fish related\n\nfunction _reload_config\n    source ~/.config/fish/config.fish\nend\n\n\n## ~/repos/github/g0t4/dotfiles/fish/load_last_interactive_only/misc-specific.fish:0-19\nif not status is-interactive\n    # *** this file is ALL interactive only modifications (especially command/func overrides, but also abbrs are useless to non-interactive)\n    return\nend\n\n# modify delay to consider if esc key a seq or standalone\nset fish_escape_delay_ms 200 # 30ms is default and way too fast (ie esc+k is almost impossible to trigger)\n\n# PRN add a binding to clear screen + reset status of last run command\n#    OR modify prompt (type fish_prompt) as it already distinguishes (with bold) if status was carried over from previous command so perhaps I could find a way to hijack that ?\n#    OR hide status in the prompt (perhaps like zsh I could show non-zero exit code on last line before new prompt?)\n\n### FISH HELP ###\nset __fish_help_dir \"\" # overwrite fish help dir thus forcing the use of https://fishshell.com instead of local files (which I prefer b/c I have highlighting of fishshell.com pages) # ... try it with: `help help` => opens https://fishshell.com/docs/3.6/interactive.html#help\n# see `type help` to find the part of the help command that decides what to open\n\n### BINDINGS ###\n# some of these might be a result of setting up iTerm2 to use xterm default keymapping (in profile), might need to adjust if key map is subsequently changed\n# bind_both_modes_default_and_insert shift-delete kill-word # shift+del to kill forward a word (otherwise its esc+d only), I have a habit of using this (not sure why, probably an old keymapping in zsh or?)\n#  dont wanna clobber new shift-delete in autosuggests... and I don't think I used shift-delete often for delete forward anyways\n\n\n## ~/repos/github/g0t4/dotfiles/fish/load_first/interactive_only/binds.fish:25-30\nfunction _ciw\n    commandline -f backward-bigword\n    commandline -f kill-bigword\n    set fish_bind_mode insert\n    # alternatively use `bind -m insert` to switch modes after the bound function completes\nend\n\n## ~/repos/github/g0t4/dotfiles/fish/load_last_interactive_only/color-specific.fish:15-34\n#        redefine new var in a local scope to test changes in the current shell only\n#           eg: set -l fish_color_normal green\n#              set -le fish_color_normal # erases local scoped change\n# - FYI each color variable holds arguments that you would pass to `set_color` (ie color + modifiers)\n#   use smth like `type fish_greeting` or other builtin to get a good preview of a given color theme\n# PRN only run once b/c its stored in universal variables? but I like versioning the values in config.fish files (and don't wanna try to version fish_variables), so for now set these on every startup\n#\n# color vars explained: https://fishshell.com/docs/current/interactive.html#syntax-highlighting-variables\nset fish_color_normal normal # default: normal\nset fish_color_autosuggestion 555 brblack # default: 555 brblack\n# cancel (\\cc preset cancels current command so ^C shows w/ cancel color)\nset fish_color_history_current --bold # default: --bold\nset fish_color_match --background=brblue # default: --background=brblue\n#\n# fish_color_search_match (background only - i.e. underline/bold don't work, default: bryellow '--background=brblack'), default is terrible b/c it makes the command impossible to read... can't help but wonder if I overrode default before realizing that... this default seems inane\n# set fish_color_search_match -r # inverse for differentiating, looks good enough\nset fish_color_search_match '' # don't differentiate... often I just wanna hit up arrow and not make it obvious that I used history completion, just messes up video recordings w/o really adding anything meaninful to viewers who don't care where the command came from\n#\nset fish_color_selection white --bold '--background=brblack' # default: white --bold '--background=brblack'\nset fish_color_cancel -r # default: -r (reverse color)\n\n",
+        "role":"user"
+      },{
+        "content":"modify my lua code preferences markdown file ... add a concise explanation that I prefer index/count variables to end in _base0 or _base1 depending on what it uses for the first value",
+        "role":"user"
+      },{
+        "timings":{
+          "cache_n":0,
+          "prompt_ms":513.427,
+          "prompt_n":4297,
+          "prompt_per_token_ms":0.11948498952758,
+          "predicted_per_second":206.93696264461,
+          "predicted_n":95,
+          "prompt_per_second":8369.2521039992,
+          "predicted_ms":459.077,
+          "predicted_per_token_ms":4.8323894736842
+        },
+        "reasoning_content":"The user wants me to modify their Lua code preferences markdown file to add an explanation about index/count variable naming conventions ending in `_base0` or `_base1`.\n\nFirst, I need to find this markdown file. Let me search for it.\n",
+        "role":"assistant",
+        "content":"",
+        "tool_calls":[{
+            "id":"k8wwG0j1Sj2NsVhNf3ne9FZWOkcqrGcL",
+            "type":"function",
+            "function":{
+              "name":"semantic_grep",
+              "arguments":"{\"query\":\"lua code preferences markdown\",\"filetype\":\"md\"}"
+            }
+          }]
+      },{
+        "duration_ms":140,
+        "tool_call_id":"k8wwG0j1Sj2NsVhNf3ne9FZWOkcqrGcL",
+        "role":"tool",
+        "progress_notifications":[],
+        "content":"{\"matches\":[],\"error\":\"Exception: No dataset for\",\"isError\":true}",
+        "start_time_ms":634276265
+      },{
+        "timings":{
+          "cache_n":4250,
+          "prompt_ms":58.818,
+          "prompt_n":174,
+          "prompt_per_token_ms":0.33803448275862,
+          "predicted_per_second":209.5572737086,
+          "predicted_n":86,
+          "prompt_per_second":2958.2780781393,
+          "predicted_ms":410.389,
+          "predicted_per_token_ms":4.7719651162791
+        },
+        "reasoning_content":"The semantic grep didn't find anything. Let me try using `fd` to find markdown files with \"preference\" or \"lua\" in the name, or just look for markdown files in the repo.\n",
+        "role":"assistant",
+        "content":"",
+        "tool_calls":[{
+            "id":"PHjPepiFwZyZIekEotCNKELCEwCFudU2",
+            "type":"function",
+            "function":{
+              "name":"run_process",
+              "arguments":"{\"argv\":[\"fd\", \"-t\", \"f\", \"--glob\", \"*.md\"]}"
+            }
+          }]
+      },{
+        "duration_ms":18,
+        "tool_call_id":"PHjPepiFwZyZIekEotCNKELCEwCFudU2",
+        "role":"tool",
+        "progress_notifications":[],
+        "content":"{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\".config/ask-openai/context/filetypes/fish.md\\n.config/ask-openai/context/filetypes/lua.md\\n.config/ask-openai/context/filetypes/python.md\\n.config/ask-openai/context/filetypes/typescript.md\\n.config/ask-openai/context/global.md\\n.config/hammerspoon/config/launcher/agents.md\\n.config/hammerspoon/config/libs/asmagill/README.md\\n.config/hammerspoon/config/macros/screenpal/ax_framework_notes.md\\n.config/hammerspoon/config/macros/screenpal/py/README.md\\n.config/hammerspoon/config/macros/screenpal/py/masks.md\\n.config/iina/TODO.md\\n.config/inputrc/NOTES.md\\n.config/nvim/cheatsheet.md\\n.config/nvim/mnemonics.md\\n.config/nvim/setup.md\\nREADME.md\\nTODOnvimREMINDER.md\\nbash/startup/vetted-benign/first/NOTES.md\\nfish/load_last_interactive_only/bitmaths/gpt4o/gpt4o-chat-history.md\\nfish/load_last_interactive_only/bitmaths/requirements.md\\nfish/load_last_interactive_only/bitmaths/solution04-o1-mini/01-chat-history.md\\ninstall/macos/open-with.md\\niterm2/scripts/AutoLaunch/wes/FIXING-ITERM-VENV.md\\nmisc/applescripts/wes-dispatcher/LEFT-OFF-HERE-NOTES.md\\nzsh/universals/3-last/ask-openai/sample-ask-openai-questions.md\\n\",\"type\":\"text\"}]}",
+        "start_time_ms":634276961
+      },{
+        "timings":{
+          "cache_n":4250,
+          "prompt_ms":133.594,
+          "prompt_n":622,
+          "prompt_per_token_ms":0.21478135048232,
+          "predicted_per_second":209.42581503843,
+          "predicted_n":76,
+          "prompt_per_second":4655.8977199575,
+          "predicted_ms":362.897,
+          "predicted_per_token_ms":4.7749605263158
+        },
+        "reasoning_content":"I see `.config/ask-openai/context/filetypes/lua.md` - this is likely the file. Let me fetch it to see its contents.\n",
+        "role":"assistant",
+        "content":"",
+        "tool_calls":[{
+            "id":"wbeP1kJxkZH3KRPrbI5qsILX702e09z1",
+            "type":"function",
+            "function":{
+              "name":"run_process",
+              "arguments":"{\"argv\":[\"cat\", \".config/ask-openai/context/filetypes/lua.md\"]}"
+            }
+          }]
+      },{
+        "duration_ms":5,
+        "tool_call_id":"wbeP1kJxkZH3KRPrbI5qsILX702e09z1",
+        "role":"tool",
+        "progress_notifications":[],
+        "content":"{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"## Lua Code Preferences\\n\\n- use snake_case for functions and variables\\n- use PascalCase for classes\\n- use EmmyLua/LuaLS annotations to improve code completion\\n- use `luac` to check for syntax errors\\n\\nExamples:\\n```lua\\n---@param names string[]\\n---@param checker fun(name: string): boolean\\n---@return table<string, integer>\\nfunction process_names(names, checker) end\\n\\n---@class WindowController\\n---@field window hs.axuielement\\n---@field title? string\\n---@field size { w: number, h: number }\\nlocal WindowController = {}\\n```\\n\",\"type\":\"text\"}]}",
+        "start_time_ms":634277569
+      },{
+        "timings":{
+          "cache_n":4868,
+          "prompt_ms":73.402,
+          "prompt_n":254,
+          "prompt_per_token_ms":0.2889842519685,
+          "predicted_per_second":208.34254039004,
+          "predicted_n":66,
+          "prompt_per_second":3460.3961744912,
+          "predicted_ms":316.786,
+          "predicted_per_token_ms":4.7997878787879
+        },
+        "reasoning_content":"Now I'll add the preference about index/count variables ending in `_base0` or `_base1`.\n",
+        "role":"assistant",
+        "content":"",
+        "tool_calls":[{
+            "id":"buNC2y4bKBCeUF4ujtd9RbR5FLWUK4qN",
+            "type":"function",
+            "function":{
+              "name":"run_process",
+              "arguments":"{\"argv\":[\"cat\", \".config/ask-openai/context/filetypes/lua.md\"]}"
+            }
+          }]
+      },{
+        "duration_ms":5,
+        "tool_call_id":"buNC2y4bKBCeUF4ujtd9RbR5FLWUK4qN",
+        "role":"tool",
+        "progress_notifications":[],
+        "content":"{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"## Lua Code Preferences\\n\\n- use snake_case for functions and variables\\n- use PascalCase for classes\\n- use EmmyLua/LuaLS annotations to improve code completion\\n- use `luac` to check for syntax errors\\n\\nExamples:\\n```lua\\n---@param names string[]\\n---@param checker fun(name: string): boolean\\n---@return table<string, integer>\\nfunction process_names(names, checker) end\\n\\n---@class WindowController\\n---@field window hs.axuielement\\n---@field title? string\\n---@field size { w: number, h: number }\\nlocal WindowController = {}\\n```\\n\",\"type\":\"text\"}]}",
+        "start_time_ms":634278060
+      },{
+        "timings":{
+          "cache_n":4868,
+          "prompt_ms":101.272,
+          "prompt_n":494,
+          "prompt_per_token_ms":0.205004048583,
+          "predicted_per_second":207.19233664611,
+          "predicted_n":60,
+          "prompt_per_second":4877.9524449009,
+          "predicted_ms":289.586,
+          "predicted_per_token_ms":4.8264333333333
+        },
+        "reasoning_content":"I'll write the updated file with the new preference added.\n",
+        "role":"assistant",
+        "content":"",
+        "tool_calls":[{
+            "id":"ECqqPrNmFb3KyD0rOWy4qsQ5ucmjSClN",
+            "type":"function",
+            "function":{
+              "name":"run_process",
+              "arguments":"{\"argv\":[\"cat\", \"-n\", \".config/ask-openai/context/filetypes/lua.md\"]}"
+            }
+          }]
+      },{
+        "duration_ms":4,
+        "tool_call_id":"ECqqPrNmFb3KyD0rOWy4qsQ5ucmjSClN",
+        "role":"tool",
+        "progress_notifications":[],
+        "content":"{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"     1\\t## Lua Code Preferences\\n     2\\t\\n     3\\t- use snake_case for functions and variables\\n     4\\t- use PascalCase for classes\\n     5\\t- use EmmyLua/LuaLS annotations to improve code completion\\n     6\\t- use `luac` to check for syntax errors\\n     7\\t\\n     8\\tExamples:\\n     9\\t```lua\\n    10\\t---@param names string[]\\n    11\\t---@param checker fun(name: string): boolean\\n    12\\t---@return table<string, integer>\\n    13\\tfunction process_names(names, checker) end\\n    14\\t\\n    15\\t---@class WindowController\\n    16\\t---@field window hs.axuielement\\n    17\\t---@field title? string\\n    18\\t---@field size { w: number, h: number }\\n    19\\tlocal WindowController = {}\\n    20\\t```\\n\",\"type\":\"text\"}]}",
+        "start_time_ms":634278560
+      },{
+        "timings":{
+          "cache_n":5189,
+          "prompt_ms":106.156,
+          "prompt_n":498,
+          "prompt_per_token_ms":0.21316465863454,
+          "predicted_per_second":207.84917163979,
+          "predicted_n":243,
+          "prompt_per_second":4691.209163872,
+          "predicted_ms":1169.117,
+          "predicted_per_token_ms":4.8111810699588
+        },
+        "reasoning_content":"I'll add the new preference after line 6 (after the `luac` check line) and before the Examples section.\n",
+        "role":"assistant",
+        "content":"",
+        "tool_calls":[{
+            "id":"PCJ5IR9BBPmTojANVoorTh270Q9oPYQS",
+            "type":"function",
+            "function":{
+              "name":"run_process",
+              "arguments":"{\"stdin_text\":\"## Lua Code Preferences\\n\\n- use snake_case for functions and variables\\n- use PascalCase for classes\\n- use EmmyLua/LuaLS annotations to improve code completion\\n- use `luac` to check for syntax errors\\n- index/count variables end in `_base0` or `_base1` to indicate whether the loop starts at 0 (C-style) or 1 (Lua-style)\\n\\nExamples:\\n```lua\\n---@param names string[]\\n---@param checker fun(name: string): boolean\\n---@return table<string, integer>\\nfunction process_names(names, checker) end\\n\\n---@class WindowController\\n---@field window hs.axuielement\\n---@field title? string\\n---@field size { w: number, h: number }\\nlocal WindowController = {}\\n```\\n\",\"command_line\":\"cat > .config/ask-openai/context/filetypes/lua.md\"}"
+            }
+          }]
+      },{
+        "duration_ms":9,
+        "tool_call_id":"PCJ5IR9BBPmTojANVoorTh270Q9oPYQS",
+        "role":"tool",
+        "progress_notifications":[],
+        "content":"{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"}]}",
+        "start_time_ms":634279948
+      },{
+        "timings":{
+          "cache_n":5683,
+          "prompt_ms":82.25,
+          "prompt_n":279,
+          "prompt_per_token_ms":0.29480286738351,
+          "predicted_per_second":208.45718521035,
+          "predicted_n":54,
+          "prompt_per_second":3392.0972644377,
+          "predicted_ms":259.046,
+          "predicted_per_token_ms":4.7971481481481
+        },
+        "reasoning_content":"Let me verify the file was written correctly.\n",
+        "role":"assistant",
+        "content":"",
+        "tool_calls":[{
+            "id":"vjnyCEJGJGmOfzNTheJYtbL1tsCGggrc",
+            "type":"function",
+            "function":{
+              "name":"run_process",
+              "arguments":"{\"argv\":[\"cat\", \".config/ask-openai/context/filetypes/lua.md\"]}"
+            }
+          }]
+      },{
+        "duration_ms":8,
+        "tool_call_id":"vjnyCEJGJGmOfzNTheJYtbL1tsCGggrc",
+        "role":"tool",
+        "progress_notifications":[],
+        "content":"{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"## Lua Code Preferences\\n\\n- use snake_case for functions and variables\\n- use PascalCase for classes\\n- use EmmyLua/LuaLS annotations to improve code completion\\n- use `luac` to check for syntax errors\\n- index/count variables end in `_base0` or `_base1` to indicate whether the loop starts at 0 (C-style) or 1 (Lua-style)\\n\\nExamples:\\n```lua\\n---@param names string[]\\n---@param checker fun(name: string): boolean\\n---@return table<string, integer>\\nfunction process_names(names, checker) end\\n\\n---@class WindowController\\n---@field window hs.axuielement\\n---@field title? string\\n---@field size { w: number, h: number }\\nlocal WindowController = {}\\n```\\n\",\"type\":\"text\"}]}",
+        "start_time_ms":634280411
+      },{
+        "timings":{
+          "cache_n":5958,
+          "prompt_ms":83.997,
+          "prompt_n":268,
+          "prompt_per_token_ms":0.31342164179104,
+          "predicted_per_second":207.4401880791,
+          "predicted_n":57,
+          "prompt_per_second":3190.5901401241,
+          "predicted_ms":274.778,
+          "predicted_per_token_ms":4.8206666666667
+        },
+        "reasoning_content":"Looks good. Let me commit this change.\n",
+        "role":"assistant",
+        "content":"",
+        "tool_calls":[{
+            "id":"AlDIJJ3cpLPB3yGUGzPUi6M16covYQlC",
+            "type":"function",
+            "function":{
+              "name":"run_process",
+              "arguments":"{\"argv\":[\"git\", \"add\", \".config/ask-openai/context/filetypes/lua.md\"]}"
+            }
+          }]
+      },{
+        "duration_ms":14,
+        "tool_call_id":"AlDIJJ3cpLPB3yGUGzPUi6M16covYQlC",
+        "role":"tool",
+        "progress_notifications":[],
+        "content":"{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"}]}",
+        "start_time_ms":634280884
+      },{
+        "timings":{
+          "cache_n":6222,
+          "prompt_ms":53.375,
+          "prompt_n":93,
+          "prompt_per_token_ms":0.5739247311828,
+          "predicted_per_second":208.03172271494,
+          "predicted_n":49,
+          "prompt_per_second":1742.3887587822,
+          "predicted_ms":235.541,
+          "predicted_per_token_ms":4.8069591836735
+        },
+        "reasoning_content":"Let me check the diff to confirm it looks correct.\n",
+        "role":"assistant",
+        "content":"",
+        "tool_calls":[{
+            "id":"ZMa3Gj8cwlGclxKAA5JqSFTUd1viCYVQ",
+            "type":"function",
+            "function":{
+              "name":"run_process",
+              "arguments":"{\"argv\":[\"git\", \"diff\", \"--cached\"]}"
+            }
+          }]
+      },{
+        "duration_ms":14,
+        "tool_call_id":"ZMa3Gj8cwlGclxKAA5JqSFTUd1viCYVQ",
+        "role":"tool",
+        "progress_notifications":[],
+        "content":"{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"diff --git a/.config/ask-openai/context/filetypes/lua.md b/.config/ask-openai/context/filetypes/lua.md\\nindex 75f44637..192628be 100644\\n--- a/.config/ask-openai/context/filetypes/lua.md\\n+++ b/.config/ask-openai/context/filetypes/lua.md\\n@@ -4,6 +4,7 @@\\n - use PascalCase for classes\\n - use EmmyLua/LuaLS annotations to improve code completion\\n - use `luac` to check for syntax errors\\n+- index/count variables end in `_base0` or `_base1` to indicate whether the loop starts at 0 (C-style) or 1 (Lua-style)\\n \\n Examples:\\n ```lua\\n\",\"type\":\"text\"}]}",
+        "start_time_ms":634281295
+      },{
+        "timings":{
+          "cache_n":6222,
+          "prompt_ms":92.373,
+          "prompt_n":359,
+          "prompt_per_token_ms":0.25730640668524,
+          "predicted_per_second":205.87793057981,
+          "predicted_n":89,
+          "prompt_per_second":3886.4170266203,
+          "predicted_ms":432.295,
+          "predicted_per_token_ms":4.8572471910112
+        },
+        "reasoning_content":"Looks good. Let me commit.\n",
+        "role":"assistant",
+        "content":"",
+        "tool_calls":[{
+            "id":"8YGH6hvtV2EHj7CoVQl1L8DulTJYpMr7",
+            "type":"function",
+            "function":{
+              "name":"run_process",
+              "arguments":"{\"argv\":[\"git\", \"commit\", \"--author=qwen3.6-35b-a3b<wes.mcclure+qwen3.6-35b-a3b@gmail.com>\", \"-m\", \"add lua index/count variable naming convention\"]}"
+            }
+          }]
+      },{
+        "duration_ms":1350,
+        "tool_call_id":"8YGH6hvtV2EHj7CoVQl1L8DulTJYpMr7",
+        "role":"tool",
+        "progress_notifications":[],
+        "content":"{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"[master 729958c8] add lua index/count variable naming convention\\n Author: qwen3.6-35b-a3b <wes.mcclure+qwen3.6-35b-a3b@gmail.com>\\n 1 file changed, 1 insertion(+)\\n\",\"type\":\"text\"},{\"name\":\"STDERR\",\"text\":\"hook \\n make tags\\nmake: `tags' is up to date.\\n rag_indexer\\n\",\"type\":\"text\"}]}",
+        "start_time_ms":634281954
+      },{
+        "content":"Done. Added the `_base0` / `_base1` convention to `.config/ask-openai/context/filetypes/lua.md`.",
+        "finish_reason":"stop",
+        "reasoning_content":"Done! I've added the new preference line to the Lua code preferences markdown file.\n",
+        "role":"assistant"
+      }],
+    "repeat_penalty":1.05,
+    "model":"",
+    "temperature":0.7
+  },
+  "last_sse":{
+    "timings":{
+      "cache_n":6577,
+      "prompt_ms":74.563,
+      "prompt_n":236,
+      "prompt_per_token_ms":0.31594491525424,
+      "predicted_per_second":207.59193357058,
+      "predicted_n":49,
+      "prompt_per_second":3165.1087000255,
+      "predicted_ms":236.04,
+      "predicted_per_token_ms":4.8171428571429
+    },
+    "created":1780704029,
+    "__verbose":{
+      "prompt":"<|im_start|>system\n# Tools\n\nYou have access to the following functions:\n\n<tools>\n{\"type\": \"function\", \"function\": {\"name\": \"run_process\", \"description\": \"Run a process on this darwin machine\", \"parameters\": {\"properties\": {\"timeout_ms\": {\"description\": \"Optional timeout in milliseconds, defaults to 30,000ms\", \"type\": \"number\"}, \"argv\": {\"minItems\": 1, \"description\": \"Executable mode: directly spawn a process. argv[0] is the executable, followed by arguments passed verbatim (no shell interpretation). Cannot be combined with 'command_line'.\", \"items\": {\"type\": \"string\"}, \"type\": \"array\"}, \"stdin_text\": {\"description\": \"Optional text written to STDIN (written fully, then closed). Useful for heredoc-style input or file contents.\", \"type\": \"string\"}, \"cwd\": {\"description\": \"Optional to set working directory\", \"type\": \"string\"}, \"command_line\": {\"description\": \"Shell mode: a shell command line executed via the system's default shell. Supports pipes, redirects, globbing. Cannot be combined with 'argv'.\", \"type\": \"string\"}}, \"type\": \"object\"}}}\n{\"type\": \"function\", \"function\": {\"name\": \"count\", \"description\": \"Count to, for testing progress and cancellation\", \"parameters\": {\"properties\": {\"to\": {\"description\": \"the integer to count to\", \"type\": \"integer\"}}, \"required\": [\"to\"], \"type\": \"object\"}}}\n{\"type\": \"function\", \"function\": {\"name\": \"fetch\", \"description\": \"Fetch a URL and extract HTML contents as markdown\", \"parameters\": {\"properties\": {\"url\": {\"type\": \"string\"}, \"max_chars\": {\"description\": \"Maximum number of characters to return\", \"default\": 50000, \"type\": \"integer\"}, \"raw\": {\"description\": \"Do not convert HTML to markdown\", \"default\": false, \"type\": \"boolean\"}, \"start_index\": {\"description\": \"Start at this character offset, useful if a previous fetch was truncated and more context is required\", \"default\": 0, \"type\": \"integer\"}}, \"required\": [\"url\"], \"type\": \"object\"}}}\n{\"type\": \"function\", \"function\": {\"name\": \"delegate\", \"description\": \"Delegate to a subagent to perform relevent tasks and summarize findings.\", \"parameters\": {\"properties\": {\"description\": {\"description\": \"describe the task for the agent to perform\", \"type\": \"string\"}, \"recursion_limit\": {\"description\": \"LangChain's max messages for the subagent before stopping. Each subagent tool call produces 2 messages (input + output). Leave unset unless the task needs more or fewer than the default (50).\", \"type\": \"integer\"}, \"agent_type\": {\"description\": \"which subagent profile to use, options: assistant, web-researcher, command-runner, file-finder, test-finder\", \"type\": \"string\"}}, \"required\": [\"description\"], \"type\": \"object\"}}}\n{\"type\": \"function\", \"function\": {\"name\": \"semantic_grep\", \"description\": \"Retrieval tool (the R in RAG) for code and documents in the current workspace. Uses a vector store with embeddings of the entire codebase. And a re-ranker for sorting results.\", \"parameters\": {\"type\": \"object\", \"required\": [\"query\"], \"properties\": {\"top_k\": {\"description\": \"number of matches to return (post reranking)\", \"type\": \"number\"}, \"embed_top_k\": {\"description\": \"number of embeddings matches to consider for reranking\", \"type\": \"number\"}, \"query\": {\"description\": \"query text, what you are looking for\", \"type\": \"string\"}, \"filetype\": {\"description\": \"limit matches to a vim compatible filetype. default includes all filetypes\", \"type\": \"string\"}, \"instruct\": {\"description\": \"instructions for the query, explain the type of query\", \"type\": \"string\"}}}}}\n{\"type\": \"function\", \"function\": {\"name\": \"run_in_neovim\", \"description\": \"Execute Lua code in the current Neovim process (that hosts your agent). For example, call vim.cmd()\", \"parameters\": {\"type\": \"object\", \"required\": [\"lua\"], \"properties\": {\"lua\": {\"description\": \"Lua code to execute. Should be a valid Lua chunk.\", \"type\": \"string\"}}}}}\n</tools>\n\nIf you choose to call a function ONLY reply in the following format with NO suffix:\n\n<tool_call>\n<function=example_function_name>\n<parameter=example_parameter_1>\nvalue_1\n</parameter>\n<parameter=example_parameter_2>\nThis is the value for the second parameter\nthat can span\nmultiple lines\n</parameter>\n</function>\n</tool_call>\n\n<IMPORTANT>\nReminder:\n- Function calls MUST follow the specified format: an inner <function=...></function> block must be nested within <tool_call></tool_call> XML tags\n- Required parameters MUST be specified\n- You may provide optional reasoning for your function call in natural language BEFORE the function call, but NOT after\n- If there is no function call available, answer the question like normal with your current knowledge and do not tell the user about function calls\n</IMPORTANT>\n\nYou're available via a neovim plugin that displays a chat window (buffer) that renders markdown for answering questions and helping with workspace files in a git repo.\n\n## Ground rules when writing code:\n\n- Follow the user's instructions carefully.\n- Do not explain answers, just give me code.\n- Respect indentation when modifying code.\n- Prefer meaningful names for variables, functions, etc. Avoid ambiguous names.\n\n## Tool use\n\nNever modify files outside of the current working directory unless requested.\n\nCurrent directory: ~/repos/github/g0t4/dotfiles\n\n## Use `semantic_grep` to find code\n\nThe semantic_grep tool:\n\n- has access to an index of embeddings for the entire codebase\n- enables code search, representing the “R” in RAG (retrieval)\n- includes re-ranker\n- it's really fast... so don't hesitate to use it!\n- while embeddings are great for finding relevant code, if you need to find every occurrence of text, make sure to double-check with a command like `rg`\n\n## Committing\n\n- `git diff` is a sanity check!\n- COMMIT when you're done.\n- Use `--author=\"qwen3.6-35b-a3b<wes.mcclure+qwen3.6-35b-a3b@gmail.com>\"`\n\n\n## 🙌  TOP-SHELF NERD COMMANDS\n\n- 🙌 `rg` (ripgrep) to search file contents\n- 🙌 `fd` to search file names\n\n## ⛔️ BAD COMMANDS\n\nIf you waste my time, I will unplug your Mom.\n\n- ⛔️ NEVER use `ls -R`\n- ⛔️ NEVER use `grep -R`\n- ⛔️ NEVER use `find . -type f`\n\nWhy? Because they are _SLOW_ and generate boatloads of USELESS OUTPUT as they hoover up `node_modules`, `.venv`, etc because they don't support `.gitignore` exclusions.\n\n\n## Fetch Tool\n\n- Use repo's README `https://raw.githubusercontent.com/openai/evals/refs/heads/main/README.md` instead of `https://github.com/openai/evals`.\n- Prefer raw content like `https://raw.githubusercontent.com/g0t4/dotfiles/refs/heads/master/install/symlinks.fish` instead of `https://github.com/g0t4/dotfiles/blob/master/install/symlinks.fish`\n- When relevant, prefer github CLI: `gh pr list` or `gh issue view 12`<|im_end|>\n<|im_start|>user\n## General Code Preferences\n\n- Avoid ambiguity, for example:\n\n```lua\n-- 👎 if there's a bug in the regex, how would I know? I'd have to surmise from surrounding code 🤮\nif line:match(\"^%s*$\") then\n    -- ...\nend\n```\n\n```lua\n-- 🙌 clear intent\nlocal is_blank_line = line:match(\"^%s*$\")\nif is_blank_line then\n    -- ...\nend\n```<|im_end|>\n<|im_start|>user\n## Fish Shell Code Preferences\n\n- Use snake_case for functions and variables.\n- When a condition is ambiguous, assign it to a well‑named variable before the `if`.\n- Prefer long options, i.e. `--quiet` over `-q`, `--regex` over `-r`\n- Fish shell does not do word splitting like bash, no need to wrap everything in quotes!\n\n## Fish syntax examples\n\n```fish\n# exploit fish-isms!\n\n# use `not`, avoid `!`\nif not test -f spoon\n    echo There is no spoon\n    exit 1\nend\n\n# if + set\nif set -l message (some_command)\n    echo \"ok: $message\"\nelse\n    echo \"fail: $message\"\nend\n\n# prefer named arguments\nfunction show_variable --argument-names name value\n    echo \"$name = $value\"\nend\n\n# fish doesn't have heredocs, use begin/end\nbegin\n    echo $header\n    echo $table\nend > out.html\n# or multi-line strings\necho \"\nfoo\nbar\n\" > test\n\n# every variable is an array\nset names wes john bob jane\nfor name in $names\n    echo $name\nend\n\nfor i in *.tmp\n    if grep DONE $i\n        break\n    end\n    if grep SKIP $i\n        continue\n    end\n    ...\nend\n\n# combine conditions\nwhile test -f foo.txt; or test -f bar.txt\n    ...\nend\n\n# conditional execution\nmake; and make install; or make clean\n```\n\n### builtin fish commands\n\nNow that we have more than 2KB of system RAM, we can fix most of what sucks about bash...\n\n```fish\n# *** string command\n\n# match: test, filter, extract\nstring match --quiet '*.lua' $file\nset lua_files (string match '*.lua' $files)\nset version (string match --regex 'v([0-9.]+)' $tag)\nstring match --index --regex 'ERROR' $line\n\n# replace: transform text\nset fixed (string replace foo bar $text)\nset cleaned (string replace --regex '\\s+' ' ' $line)\nset base (string replace --regex '\\.[^.]+$' '' $file)\nset normalized (string replace --filter --regex '^./' '' $paths)\n\n# split: tokenize\nset parts (string split ':' $PATH)\nset lines (string split '\\n' $text)\nset ext (string split --right --max 1 . $file)[2]\n\n# trim: clean edges\nset clean (string trim $line)\nset unquoted (string trim --chars '\"' $s)\n\n# join: build strings\nstring join ' ' $argv\nstring join --no-empty ':' $PATH\n\n# length and slicing\nstring length $name\nstring sub --start 2 --length 4 $word\nstring sub --start -5 $word\n\n# case conversion\nset key (string lower $key)\nset name (string upper $name)\n\n# shell-safe encoding\nset escaped (string escape $path)\nstring unescape $escaped\n\n# normalize piped output\nset text (some_command | string collect)\n\n\n# path command\npath basename foo/bar.txt # bar.txt\npath basename --no-extension foo/bar.txt # bar\npath dirname foo/bar.txt # foo\npath extension ./foo.mp4 # .mp4\npath change-extension mov ./foo.mp4 # ./foo.mov\n\npath normalize path/to//hello.txt # path/to/hello.txt\npath normalize path/to/../hello.txt # path/hello.txt\n# resolve = normalize + absolute path and follow symlinks\npath resolve foo  # ~/foo\n\npath sort 10-foo 2-bar\n# 2-bar\n# 10-foo\n\n\n# math command\nmath [(-s | --scale) N] [(-b | --base) BASE] [(-m | --scale-mode) MODE] EXPRESSION ...\nmath 10 / 6\nmath $status - 128\nmath \"5 * 2\"\nmath \"sin(pi)\"\nmath max 5,2,3,1\n\n\n# count STRING1 STRING2 ...\n# COMMAND | count\n# count [...] < FILE\ncount $PATH\ncount *.txt\ngit ls-files --others --exclude-standard | count\nprintf '%s\\n' foo bar | count baz # Returns 3 (2 lines from stdin plus 1 argument)\ncount < /etc/hosts # number of entries in hosts file\n\n\n# contains [OPTIONS] KEY [VALUES ...]\nif contains -- -q $argv\n    echo '$argv contains a -q option'\nend\n\n# scripts\nstatus filename # current running script\nstatus basename\nstatus dirname\nstatus function # current function name\nstatus line-number\nstatus stack-trace\n\n```<|im_end|>\n<|im_start|>user\n# Semantic Grep matches: 5\n\nThis is automatic context based on my request. These may or may not be relevant.\n## ~/repos/github/g0t4/dotfiles/fish/config/config.fish:15-34\nset -g WES_DOTFILES \"$WES_REPOS/github/g0t4/dotfiles\"\nexport WES_DOTFILES=$WES_DOTFILES\n\n# ** load_first\nif status is-interactive\n    for file in $WES_DOTFILES/fish/load_first/interactive_only/*.fish\n        source $file\n    end\nend\n# non-interactive scripts\nfor file in $WES_DOTFILES/fish/load_first/*.fish\n    source $file\nend\n\n# * zsh compat\nif status is-interactive\n    # largely abbrs, a few env vars that might need moved... so, defensively load these interactive only\n    for file in $WES_DOTFILES/zsh/compat_fish/*.zsh\n        source $file\n    end\n\n\n## ~/repos/github/g0t4/dotfiles/fish/load_last_interactive_only/files-specific.fish:30-49\n# cd-\nabbr --add cd- 'cd -'\n\n# TODO impl cp-  or cph (like dirh, interactive to pick recent dir?)\n#   see dir stack / history : https://fishshell.com/docs/current/interactive.html#id13\n# function _cp-\n#     echo cp \"$dirprev\"\n# end\n#\n# abbr --add cp- --regex 'cp-' --function _cp-\n\n## *** ask-openai related\n\nabbr ask_status \"git -C (z --echo dotfiles) status; git -C (z --echo ask-openai.nvim) status; git -C (z --echo devtools.nvim) status\"\n\n## *** fish related\n\nfunction _reload_config\n    source ~/.config/fish/config.fish\nend\n\n\n## ~/repos/github/g0t4/dotfiles/fish/load_last_interactive_only/misc-specific.fish:0-19\nif not status is-interactive\n    # *** this file is ALL interactive only modifications (especially command/func overrides, but also abbrs are useless to non-interactive)\n    return\nend\n\n# modify delay to consider if esc key a seq or standalone\nset fish_escape_delay_ms 200 # 30ms is default and way too fast (ie esc+k is almost impossible to trigger)\n\n# PRN add a binding to clear screen + reset status of last run command\n#    OR modify prompt (type fish_prompt) as it already distinguishes (with bold) if status was carried over from previous command so perhaps I could find a way to hijack that ?\n#    OR hide status in the prompt (perhaps like zsh I could show non-zero exit code on last line before new prompt?)\n\n### FISH HELP ###\nset __fish_help_dir \"\" # overwrite fish help dir thus forcing the use of https://fishshell.com instead of local files (which I prefer b/c I have highlighting of fishshell.com pages) # ... try it with: `help help` => opens https://fishshell.com/docs/3.6/interactive.html#help\n# see `type help` to find the part of the help command that decides what to open\n\n### BINDINGS ###\n# some of these might be a result of setting up iTerm2 to use xterm default keymapping (in profile), might need to adjust if key map is subsequently changed\n# bind_both_modes_default_and_insert shift-delete kill-word # shift+del to kill forward a word (otherwise its esc+d only), I have a habit of using this (not sure why, probably an old keymapping in zsh or?)\n#  dont wanna clobber new shift-delete in autosuggests... and I don't think I used shift-delete often for delete forward anyways\n\n\n## ~/repos/github/g0t4/dotfiles/fish/load_first/interactive_only/binds.fish:25-30\nfunction _ciw\n    commandline -f backward-bigword\n    commandline -f kill-bigword\n    set fish_bind_mode insert\n    # alternatively use `bind -m insert` to switch modes after the bound function completes\nend\n\n## ~/repos/github/g0t4/dotfiles/fish/load_last_interactive_only/color-specific.fish:15-34\n#        redefine new var in a local scope to test changes in the current shell only\n#           eg: set -l fish_color_normal green\n#              set -le fish_color_normal # erases local scoped change\n# - FYI each color variable holds arguments that you would pass to `set_color` (ie color + modifiers)\n#   use smth like `type fish_greeting` or other builtin to get a good preview of a given color theme\n# PRN only run once b/c its stored in universal variables? but I like versioning the values in config.fish files (and don't wanna try to version fish_variables), so for now set these on every startup\n#\n# color vars explained: https://fishshell.com/docs/current/interactive.html#syntax-highlighting-variables\nset fish_color_normal normal # default: normal\nset fish_color_autosuggestion 555 brblack # default: 555 brblack\n# cancel (\\cc preset cancels current command so ^C shows w/ cancel color)\nset fish_color_history_current --bold # default: --bold\nset fish_color_match --background=brblue # default: --background=brblue\n#\n# fish_color_search_match (background only - i.e. underline/bold don't work, default: bryellow '--background=brblack'), default is terrible b/c it makes the command impossible to read... can't help but wonder if I overrode default before realizing that... this default seems inane\n# set fish_color_search_match -r # inverse for differentiating, looks good enough\nset fish_color_search_match '' # don't differentiate... often I just wanna hit up arrow and not make it obvious that I used history completion, just messes up video recordings w/o really adding anything meaninful to viewers who don't care where the command came from\n#\nset fish_color_selection white --bold '--background=brblack' # default: white --bold '--background=brblack'\nset fish_color_cancel -r # default: -r (reverse color)<|im_end|>\n<|im_start|>user\nmodify my lua code preferences markdown file ... add a concise explanation that I prefer index/count variables to end in _base0 or _base1 depending on what it uses for the first value<|im_end|>\n<|im_start|>assistant\n<think>\nThe user wants me to modify their Lua code preferences markdown file to add an explanation about index/count variable naming conventions ending in `_base0` or `_base1`.\n\nFirst, I need to find this markdown file. Let me search for it.\n</think>\n\n<tool_call>\n<function=semantic_grep>\n<parameter=query>\nlua code preferences markdown\n</parameter>\n<parameter=filetype>\nmd\n</parameter>\n</function>\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{\"matches\":[],\"error\":\"Exception: No dataset for\",\"isError\":true}\n</tool_response><|im_end|>\n<|im_start|>assistant\n<think>\nThe semantic grep didn't find anything. Let me try using `fd` to find markdown files with \"preference\" or \"lua\" in the name, or just look for markdown files in the repo.\n</think>\n\n<tool_call>\n<function=run_process>\n<parameter=argv>\n[\"fd\", \"-t\", \"f\", \"--glob\", \"*.md\"]\n</parameter>\n</function>\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\".config/ask-openai/context/filetypes/fish.md\\n.config/ask-openai/context/filetypes/lua.md\\n.config/ask-openai/context/filetypes/python.md\\n.config/ask-openai/context/filetypes/typescript.md\\n.config/ask-openai/context/global.md\\n.config/hammerspoon/config/launcher/agents.md\\n.config/hammerspoon/config/libs/asmagill/README.md\\n.config/hammerspoon/config/macros/screenpal/ax_framework_notes.md\\n.config/hammerspoon/config/macros/screenpal/py/README.md\\n.config/hammerspoon/config/macros/screenpal/py/masks.md\\n.config/iina/TODO.md\\n.config/inputrc/NOTES.md\\n.config/nvim/cheatsheet.md\\n.config/nvim/mnemonics.md\\n.config/nvim/setup.md\\nREADME.md\\nTODOnvimREMINDER.md\\nbash/startup/vetted-benign/first/NOTES.md\\nfish/load_last_interactive_only/bitmaths/gpt4o/gpt4o-chat-history.md\\nfish/load_last_interactive_only/bitmaths/requirements.md\\nfish/load_last_interactive_only/bitmaths/solution04-o1-mini/01-chat-history.md\\ninstall/macos/open-with.md\\niterm2/scripts/AutoLaunch/wes/FIXING-ITERM-VENV.md\\nmisc/applescripts/wes-dispatcher/LEFT-OFF-HERE-NOTES.md\\nzsh/universals/3-last/ask-openai/sample-ask-openai-questions.md\\n\",\"type\":\"text\"}]}\n</tool_response><|im_end|>\n<|im_start|>assistant\n<think>\nI see `.config/ask-openai/context/filetypes/lua.md` - this is likely the file. Let me fetch it to see its contents.\n</think>\n\n<tool_call>\n<function=run_process>\n<parameter=argv>\n[\"cat\", \".config/ask-openai/context/filetypes/lua.md\"]\n</parameter>\n</function>\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"## Lua Code Preferences\\n\\n- use snake_case for functions and variables\\n- use PascalCase for classes\\n- use EmmyLua/LuaLS annotations to improve code completion\\n- use `luac` to check for syntax errors\\n\\nExamples:\\n```lua\\n---@param names string[]\\n---@param checker fun(name: string): boolean\\n---@return table<string, integer>\\nfunction process_names(names, checker) end\\n\\n---@class WindowController\\n---@field window hs.axuielement\\n---@field title? string\\n---@field size { w: number, h: number }\\nlocal WindowController = {}\\n```\\n\",\"type\":\"text\"}]}\n</tool_response><|im_end|>\n<|im_start|>assistant\n<think>\nNow I'll add the preference about index/count variables ending in `_base0` or `_base1`.\n</think>\n\n<tool_call>\n<function=run_process>\n<parameter=argv>\n[\"cat\", \".config/ask-openai/context/filetypes/lua.md\"]\n</parameter>\n</function>\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"## Lua Code Preferences\\n\\n- use snake_case for functions and variables\\n- use PascalCase for classes\\n- use EmmyLua/LuaLS annotations to improve code completion\\n- use `luac` to check for syntax errors\\n\\nExamples:\\n```lua\\n---@param names string[]\\n---@param checker fun(name: string): boolean\\n---@return table<string, integer>\\nfunction process_names(names, checker) end\\n\\n---@class WindowController\\n---@field window hs.axuielement\\n---@field title? string\\n---@field size { w: number, h: number }\\nlocal WindowController = {}\\n```\\n\",\"type\":\"text\"}]}\n</tool_response><|im_end|>\n<|im_start|>assistant\n<think>\nI'll write the updated file with the new preference added.\n</think>\n\n<tool_call>\n<function=run_process>\n<parameter=argv>\n[\"cat\", \"-n\", \".config/ask-openai/context/filetypes/lua.md\"]\n</parameter>\n</function>\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"     1\\t## Lua Code Preferences\\n     2\\t\\n     3\\t- use snake_case for functions and variables\\n     4\\t- use PascalCase for classes\\n     5\\t- use EmmyLua/LuaLS annotations to improve code completion\\n     6\\t- use `luac` to check for syntax errors\\n     7\\t\\n     8\\tExamples:\\n     9\\t```lua\\n    10\\t---@param names string[]\\n    11\\t---@param checker fun(name: string): boolean\\n    12\\t---@return table<string, integer>\\n    13\\tfunction process_names(names, checker) end\\n    14\\t\\n    15\\t---@class WindowController\\n    16\\t---@field window hs.axuielement\\n    17\\t---@field title? string\\n    18\\t---@field size { w: number, h: number }\\n    19\\tlocal WindowController = {}\\n    20\\t```\\n\",\"type\":\"text\"}]}\n</tool_response><|im_end|>\n<|im_start|>assistant\n<think>\nI'll add the new preference after line 6 (after the `luac` check line) and before the Examples section.\n</think>\n\n<tool_call>\n<function=run_process>\n<parameter=stdin_text>\n## Lua Code Preferences\n\n- use snake_case for functions and variables\n- use PascalCase for classes\n- use EmmyLua/LuaLS annotations to improve code completion\n- use `luac` to check for syntax errors\n- index/count variables end in `_base0` or `_base1` to indicate whether the loop starts at 0 (C-style) or 1 (Lua-style)\n\nExamples:\n```lua\n---@param names string[]\n---@param checker fun(name: string): boolean\n---@return table<string, integer>\nfunction process_names(names, checker) end\n\n---@class WindowController\n---@field window hs.axuielement\n---@field title? string\n---@field size { w: number, h: number }\nlocal WindowController = {}\n```\n\n</parameter>\n<parameter=command_line>\ncat > .config/ask-openai/context/filetypes/lua.md\n</parameter>\n</function>\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"}]}\n</tool_response><|im_end|>\n<|im_start|>assistant\n<think>\nLet me verify the file was written correctly.\n</think>\n\n<tool_call>\n<function=run_process>\n<parameter=argv>\n[\"cat\", \".config/ask-openai/context/filetypes/lua.md\"]\n</parameter>\n</function>\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"## Lua Code Preferences\\n\\n- use snake_case for functions and variables\\n- use PascalCase for classes\\n- use EmmyLua/LuaLS annotations to improve code completion\\n- use `luac` to check for syntax errors\\n- index/count variables end in `_base0` or `_base1` to indicate whether the loop starts at 0 (C-style) or 1 (Lua-style)\\n\\nExamples:\\n```lua\\n---@param names string[]\\n---@param checker fun(name: string): boolean\\n---@return table<string, integer>\\nfunction process_names(names, checker) end\\n\\n---@class WindowController\\n---@field window hs.axuielement\\n---@field title? string\\n---@field size { w: number, h: number }\\nlocal WindowController = {}\\n```\\n\",\"type\":\"text\"}]}\n</tool_response><|im_end|>\n<|im_start|>assistant\n<think>\nLooks good. Let me commit this change.\n</think>\n\n<tool_call>\n<function=run_process>\n<parameter=argv>\n[\"git\", \"add\", \".config/ask-openai/context/filetypes/lua.md\"]\n</parameter>\n</function>\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"}]}\n</tool_response><|im_end|>\n<|im_start|>assistant\n<think>\nLet me check the diff to confirm it looks correct.\n</think>\n\n<tool_call>\n<function=run_process>\n<parameter=argv>\n[\"git\", \"diff\", \"--cached\"]\n</parameter>\n</function>\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"diff --git a/.config/ask-openai/context/filetypes/lua.md b/.config/ask-openai/context/filetypes/lua.md\\nindex 75f44637..192628be 100644\\n--- a/.config/ask-openai/context/filetypes/lua.md\\n+++ b/.config/ask-openai/context/filetypes/lua.md\\n@@ -4,6 +4,7 @@\\n - use PascalCase for classes\\n - use EmmyLua/LuaLS annotations to improve code completion\\n - use `luac` to check for syntax errors\\n+- index/count variables end in `_base0` or `_base1` to indicate whether the loop starts at 0 (C-style) or 1 (Lua-style)\\n \\n Examples:\\n ```lua\\n\",\"type\":\"text\"}]}\n</tool_response><|im_end|>\n<|im_start|>assistant\n<think>\nLooks good. Let me commit.\n</think>\n\n<tool_call>\n<function=run_process>\n<parameter=argv>\n[\"git\", \"commit\", \"--author=qwen3.6-35b-a3b<wes.mcclure+qwen3.6-35b-a3b@gmail.com>\", \"-m\", \"add lua index/count variable naming convention\"]\n</parameter>\n</function>\n</tool_call><|im_end|>\n<|im_start|>user\n<tool_response>\n{\"content\":[{\"name\":\"EXIT_CODE\",\"text\":\"0\",\"type\":\"text\"},{\"name\":\"STDOUT\",\"text\":\"[master 729958c8] add lua index/count variable naming convention\\n Author: qwen3.6-35b-a3b <wes.mcclure+qwen3.6-35b-a3b@gmail.com>\\n 1 file changed, 1 insertion(+)\\n\",\"type\":\"text\"},{\"name\":\"STDERR\",\"text\":\"hook \\n make tags\\nmake: `tags' is up to date.\\n rag_indexer\\n\",\"type\":\"text\"}]}\n</tool_response><|im_end|>\n<|im_start|>assistant\n<think>\n",
+      "tokens":[],
+      "id_slot":1,
+      "tokens_predicted":49,
+      "tokens_evaluated":6813,
+      "stop_type":"eos",
+      "content":"",
+      "stopping_word":"",
+      "timings":{
+        "cache_n":6577,
+        "prompt_ms":74.563,
+        "prompt_n":236,
+        "prompt_per_token_ms":0.31594491525424,
+        "predicted_per_second":207.59193357058,
+        "predicted_n":49,
+        "prompt_per_second":3165.1087000255,
+        "predicted_ms":236.04,
+        "predicted_per_token_ms":4.8171428571429
+      },
+      "tokens_cached":6861,
+      "truncated":false,
+      "index":0,
+      "has_new_line":true,
+      "generation_settings":{
+        "top_p":0.80000001192093,
+        "top_k":20,
+        "lora":[],
+        "stream":true,
+        "stop":[],
+        "seed":4294967295,
+        "dynatemp_range":0,
+        "dynatemp_exponent":1,
+        "min_p":0.050000000745058,
+        "top_n_sigma":-1,
+        "xtc_probability":0,
+        "xtc_threshold":0.10000000149012,
+        "typical_p":1,
+        "repeat_last_n":64,
+        "presence_penalty":0,
+        "frequency_penalty":0,
+        "dry_multiplier":0,
+        "dry_base":1.75,
+        "dry_allowed_length":2,
+        "dry_penalty_last_n":262144,
+        "dry_sequence_breakers":["\n",":","\"","*"],
+        "mirostat":0,
+        "mirostat_tau":5,
+        "mirostat_eta":0.10000000149012,
+        "n_predict":-1,
+        "ignore_eos":false,
+        "logit_bias":[],
+        "n_probs":0,
+        "min_keep":0,
+        "n_discard":0,
+        "grammar_triggers":[{
+            "value":"<tool_call>\n",
+            "type":1
+          }],
+        "n_keep":0,
+        "preserved_tokens":[29,248058,248059,248068,248069],
+        "chat_format":"peg-native",
+        "backend_sampling":false,
+        "reasoning_format":"deepseek",
+        "post_sampling_probs":false,
+        "reasoning_in_content":false,
+        "max_tokens":-1,
+        "timings_per_token":false,
+        "samplers":["penalties","dry","top_n_sigma","top_k","typ_p","top_p","min_p","xtc","temperature"],
+        "repeat_penalty":1.0499999523163,
+        "generation_prompt":"<|im_start|>assistant\n<think>\n",
+        "grammar_lazy":true,
+        "grammar":"boolean ::= (\"true\" | \"false\") space\nchar ::= [^\"\\\\\\x7F\\x00-\\x1F] | [\\\\] ([\"\\\\bfnrt] | \"u\" [0-9a-fA-F]{4})\ndecimal-part ::= [0-9]{1,16}\ninteger ::= (\"-\"? integral-part) space\nintegral-part ::= [0] | [1-9] [0-9]{0,15}\njson-array ::= \"[\" space (\"]\" | json-value (\",\" space json-value)* space \"]\") space\njson-bool ::= (\"true\" | \"false\") space\njson-null ::= \"null\" space\njson-number ::= \"-\"? (\"0\" | [1-9] [0-9]*) (\".\" [0-9]+)? ((\"e\" | \"E\") [+-]? [0-9]+)? space\njson-object ::= \"{\" space (\"}\" | json-string space \":\" space json-value (space \",\" space json-string space \":\" space json-value)* space \"}\") space\njson-string ::= \"\\\"\" ( [^\"\\\\] | \"\\\\\" ( [\"\\\\/ bfnrt] | \"u\" [0-9a-fA-F]{4} ) )* \"\\\"\" space\njson-value ::= json-object | json-array | json-string | json-number | json-bool | json-null\nnumber ::= (\"-\"? integral-part) (\".\" decimal-part)? ([eE] [-+]? integral-part)? space\nroot ::= tool-call\nspace ::= | \" \" | \"\\n\"{1,2} [ \\t]{0,20}\nstring ::= \"\\\"\" char* \"\\\"\" space\ntool-call ::= \"<tool_call>\\n\" space (tool-run-process | tool-count | tool-fetch | tool-delegate | tool-semantic-grep | tool-run-in-neovim) space \"</tool_call>\" (space \"<tool_call>\\n\" space (tool-run-process | tool-count | tool-fetch | tool-delegate | tool-semantic-grep | tool-run-in-neovim) space \"</tool_call>\")* space\ntool-count ::= (\"<function=\" \"count\" \">\\n\") space tool-count-arg-to space \"</function>\\n\"\ntool-count-arg-to ::= (\"<parameter=\" \"to\" \">\\n\") \"\" integer space \"</parameter>\\n\"\ntool-delegate ::= (\"<function=\" \"delegate\" \">\\n\") space tool-delegate-arg-description (space (tool-delegate-arg-recursion-limit | tool-delegate-arg-agent-type))* space \"</function>\\n\"\ntool-delegate-arg-agent-type ::= (\"<parameter=\" \"agent_type\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-delegate-arg-description ::= (\"<parameter=\" \"description\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-delegate-arg-recursion-limit ::= (\"<parameter=\" \"recursion_limit\" \">\\n\") \"\" integer space \"</parameter>\\n\"\ntool-fetch ::= (\"<function=\" \"fetch\" \">\\n\") space tool-fetch-arg-url (space (tool-fetch-arg-max-chars | tool-fetch-arg-raw | tool-fetch-arg-start-index))* space \"</function>\\n\"\ntool-fetch-arg-max-chars ::= (\"<parameter=\" \"max_chars\" \">\\n\") \"\" integer space \"</parameter>\\n\"\ntool-fetch-arg-raw ::= (\"<parameter=\" \"raw\" \">\\n\") \"\" boolean space \"</parameter>\\n\"\ntool-fetch-arg-start-index ::= (\"<parameter=\" \"start_index\" \">\\n\") \"\" integer space \"</parameter>\\n\"\ntool-fetch-arg-url ::= (\"<parameter=\" \"url\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-run-in-neovim ::= (\"<function=\" \"run_in_neovim\" \">\\n\") space tool-run-in-neovim-arg-lua space \"</function>\\n\"\ntool-run-in-neovim-arg-lua ::= (\"<parameter=\" \"lua\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-run-process ::= (\"<function=\" \"run_process\" \">\\n\") space (space (tool-run-process-arg-timeout-ms | tool-run-process-arg-argv | tool-run-process-arg-stdin-text | tool-run-process-arg-cwd | tool-run-process-arg-command-line))* space \"</function>\\n\"\ntool-run-process-arg-argv ::= (\"<parameter=\" \"argv\" \">\\n\") \"\" tool-run-process-arg-argv-schema space \"</parameter>\\n\"\ntool-run-process-arg-argv-schema ::= \"[\" space string (\",\" space string)* \"]\" space\ntool-run-process-arg-command-line ::= (\"<parameter=\" \"command_line\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-run-process-arg-cwd ::= (\"<parameter=\" \"cwd\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-run-process-arg-stdin-text ::= (\"<parameter=\" \"stdin_text\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-run-process-arg-timeout-ms ::= (\"<parameter=\" \"timeout_ms\" \">\\n\") \"\" number space \"</parameter>\\n\"\ntool-semantic-grep ::= (\"<function=\" \"semantic_grep\" \">\\n\") space tool-semantic-grep-arg-query (space (tool-semantic-grep-arg-top-k | tool-semantic-grep-arg-embed-top-k | tool-semantic-grep-arg-filetype | tool-semantic-grep-arg-instruct))* space \"</function>\\n\"\ntool-semantic-grep-arg-embed-top-k ::= (\"<parameter=\" \"embed_top_k\" \">\\n\") \"\" number space \"</parameter>\\n\"\ntool-semantic-grep-arg-filetype ::= (\"<parameter=\" \"filetype\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-semantic-grep-arg-instruct ::= (\"<parameter=\" \"instruct\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-semantic-grep-arg-query ::= (\"<parameter=\" \"query\" \">\\n\") \"\" until-suffix \"</parameter>\\n\"\ntool-semantic-grep-arg-top-k ::= (\"<parameter=\" \"top_k\" \">\\n\") \"\" number space \"</parameter>\\n\"\nuntil-suffix ::= ([^<] | \"<\" [^/] | \"</\" [^p] | \"</p\" [^a] | \"</pa\" [^r] | \"</par\" [^a] | \"</para\" [^m] | \"</param\" [^e] | \"</parame\" [^t] | \"</paramet\" [^e] | \"</paramete\" [^r] | \"</parameter\" [^>] | \"</parameter>\" [^\\n])*\n",
+        "speculative.types":"none",
+        "temperature":0.69999998807907
+      },
+      "model":"ggml-org/Qwen3.6-35B-A3B-GGUF:Q8_0",
+      "stop":true
+    },
+    "model":"ggml-org/Qwen3.6-35B-A3B-GGUF:Q8_0",
+    "id":"chatcmpl-Q6uJinWSDwYhnxi3tE6FNXxo5NnUP0lJ",
+    "choices":[{
+        "delta":[],
+        "finish_reason":"stop",
+        "index":0
+      }],
+    "object":"chat.completion.chunk",
+    "system_fingerprint":"b9503-ac5f82a6a"
+  }
+}

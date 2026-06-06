@@ -1,0 +1,8 @@
+Done! I added the preference to `.config/ask-openai/context/filetypes/lua.md`.
+</think>
+
+Done. Added to `.config/ask-openai/context/filetypes/lua.md`:
+
+```
+- index/count variables end in `_base0` or `_base1` to indicate whether the loop starts at 0 (C-style) or 1 (Lua-style)
+```
