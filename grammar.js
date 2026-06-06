@@ -7,6 +7,9 @@
 /// <reference types="tree-sitter-cli/dsl" />
 // @ts-check
 
+import * as constants from "./constants.js";
+// constants.IM_START
+
 export default grammar({
   name: "qwen_chatml",
 
