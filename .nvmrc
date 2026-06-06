@@ -1,1 +1,5 @@
 v22.22.2
+
+# FYI     "tree-sitter": "^0.25.0", # this only builds with node 22
+# take that one dep out and the rest build with node 24
+
