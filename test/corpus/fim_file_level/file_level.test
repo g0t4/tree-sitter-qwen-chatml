@@ -1,0 +1,27 @@
+==================
+file level FIM
+:language(qwen_chatml)
+==================
+<|fim_prefix|>local M = {}
+
+function M.add(a, b)
+    return a + b
+end
+
+function M.sub(a, b)
+    return b
+end
+
+<|fim_suffix|>
+
+return M<|fim_middle|>function M.mul(a, b)
+    return a * b
+end
+---
+(source_file
+  (fim_prefix
+    contents: (text)
+  (fim_suffix
+    contents: (text)
+  (fim_middle
+    contents: (text)))
