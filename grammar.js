@@ -17,7 +17,6 @@ export default grammar({
     $.prefix,
     $.suffix,
     $.middle,
-    $.file_contents,
     $.file_name,
     $.think_section_inlined,
   ],
@@ -69,14 +68,13 @@ export default grammar({
       "\n"
     ),
 
-    file_contents: $ => prec(-9, field("contents", $.text)),
     until_end_of_line: $ => repeat1(/[^\n]+/), // until end of line
     file_name: $ => prec(-9, field("path", $.until_end_of_line)),
     repo_file: $ => seq(
       $.file_sep_token,
       $.file_name,
       optional("\n"),
-      optional($.file_contents)),
+      optional(prec(-9, field("contents", $.text)))),
 
     file_sep_token: $ => token(constants.FILE_SEP),
     fim_repo: $ => seq(
