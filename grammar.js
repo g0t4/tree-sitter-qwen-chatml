@@ -25,11 +25,16 @@ export default grammar({
     ),
 
     fim_file: $ => seq(
-      // FIM does not require values to be provided for both prefix and suffix
-      // - but, it wouldn't make much sense if neither are provided
-      $.fim_prefix_token, optional(prec(-9, field("prefix", $.text))),
-      $.fim_suffix_token, optional(prec(-9, field("suffix", $.text))),
-      $.fim_middle_token, optional(prec(-9, field("middle", $.text))),
+
+      $.fim_prefix_token,
+      optional(prec(-9, field("prefix", $.text))),
+
+      $.fim_suffix_token,
+      optional(prec(-9, field("suffix", $.text))),
+
+      $.fim_middle_token,
+      optional(prec(-9, field("middle", $.text))),
+
     ),
 
     message: $ => seq($.im_start_token,
