@@ -48,8 +48,7 @@ export default grammar({
       $.im_end_token
     ),
 
-    role: $ => field("role", $.role_name), // greedy, take until end of line
-    role_name: $ => repeat1(/[^\n]+/),
+    role: $ => field("role", $.until_end_of_line), // greedy, take until end of line
 
     think_open_token: $ => token(constants.THINK_OPEN),
     think_close_token: $ => token(constants.THINK_CLOSE),

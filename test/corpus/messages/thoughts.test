@@ -15,17 +15,17 @@ The sky is blue.<|im_end|>
 (source_file
   (message
     (im_start_token)
-    role: (role_name) 
+    role: (until_end_of_line) 
     contents: (text)
     (im_end_token))
   (message
     (im_start_token)
-    role: (role_name) 
+    role: (until_end_of_line) 
     contents: (text)
     (im_end_token))
   (message
     (im_start_token)
-    role: (role_name) 
+    role: (until_end_of_line) 
     (think_open_token)
     reasoning: (text)
     (think_close_token)
