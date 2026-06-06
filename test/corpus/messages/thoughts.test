@@ -1,0 +1,34 @@
+==================
+thoughts
+:language(qwen_chatml)
+==================
+<|im_start|>system
+Answer the question<|im_end|>
+<|im_start|>user
+What is the color of the sky?<|im_end|>
+<|im_start|>assistant
+<think>
+would they really ask such a stupid question?
+</think>
+The sky is blue.<|im_end|>
+---
+(source_file
+  (message
+    (im_start)
+    role: (role_name) 
+    contents: (text)
+    (im_end))
+  (message
+    (im_start)
+    role: (role_name) 
+    contents: (text)
+    (im_end))
+  (message
+    (im_start)
+    role: (role_name) 
+    (thoughts
+      (think_open)
+      contents: (text)
+      (think_close))
+    contents: (text)
+    (im_end)))

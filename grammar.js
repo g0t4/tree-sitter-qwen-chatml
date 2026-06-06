@@ -22,6 +22,7 @@ export default grammar({
     $.repo_name_value,
     $.file_contents,
     $.file_name,
+    $.think_contents,
   ],
 
   rules: {
@@ -39,10 +40,25 @@ export default grammar({
       $.fim_middle, optional($.middle),
     ),
 
-    message: $ => seq($.im_start, $.role, '\n', $.message_content, $.im_end),
+    message: $ => seq($.im_start,
+      $.role,
+      '\n',
+      optional($.thoughts),
+      $.message_content,
+      $.im_end
+    ),
 
     role: $ => field("role", $.role_name), // greedy, take until end of line
     role_name: $ => repeat1(/[^\n]+/),
+
+    think_open: $ => token(constants.THINK_OPEN),
+    think_close: $ => token(constants.THINK_CLOSE),
+    think_contents: $ => prec(-9, field("contents", $.text)),
+    thoughts: $ => seq(
+      $.think_open,
+      optional($.think_contents),
+      $.think_close
+    ),
 
     // message_content: $ => repeat($.any), // TODO constrain this at all?
     message_content: $ => prec(-9, field("contents", $.text)),
@@ -86,7 +102,5 @@ export default grammar({
     im_end: $ => token(constants.IM_END),
     // final_token: $ => choice($.im_end, $.return_token, $.call_token) // TODO more than one stop/end token I care about for my parser?
 
-    think_open: $ => token(constants.THINK_OPEN),
-    think_close: $ => token(constants.THINK_CLOSE),
   }
 });
