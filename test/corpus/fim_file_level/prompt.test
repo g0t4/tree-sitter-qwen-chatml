@@ -1,5 +1,5 @@
 ==================
-file level FIM (prompt only, IOTW nothing after <|fim_middle|> so the model can respond)
+prompt (file-level FIM)
 :language(qwen_chatml)
 ==================
 <|fim_prefix|>local M = {}
@@ -17,9 +17,8 @@ end
 return M<|fim_middle|>
 ---
 (source_file
-  (fim_prefix
+  (fim_prefix)
     contents: (text)
-  (fim_suffix
+  (fim_suffix)
     contents: (text)
-  (fim_middle
-    contents: (text)))
+  (fim_middle))

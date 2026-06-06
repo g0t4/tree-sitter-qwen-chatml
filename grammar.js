@@ -21,7 +21,7 @@ export default grammar({
   rules: {
     source_file: $ => choice(
       repeat($.message),
-      seq($.fim_prefix, $.message_content, $.fim_suffix, $.message_content, $.fim_middle, $.message_content),
+      seq($.fim_prefix, $.message_content, $.fim_suffix, $.message_content, $.fim_middle, optional($.message_content)),
     ),
 
     message: $ => seq($.im_start, $.role, '\n', $.message_content, $.im_end),
