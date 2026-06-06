@@ -17,7 +17,7 @@ end
 return M<|fim_middle|>
 ---
 (source_file
-  (fim_file
+  (fim_prompt_file
     (fim_prefix)
     prefix_contents: (text)
     (fim_suffix)

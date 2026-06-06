@@ -19,7 +19,7 @@ return M<|fim_middle|>function M.mul(a, b)
 end
 ---
 (source_file
-  (fim_file
+  (fim_completed_file
     (fim_prefix)
     prefix_contents: (text)
     (fim_suffix)
