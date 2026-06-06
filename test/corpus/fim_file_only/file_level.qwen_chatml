@@ -1,0 +1,15 @@
+<|fim_prefix|>local M = {}
+
+function M.add(a, b)
+    return a + b
+end
+
+function M.sub(a, b)
+    return b
+end
+
+<|fim_suffix|>
+
+return M<|fim_middle|>function M.mul(a, b)
+    return a * b
+end
