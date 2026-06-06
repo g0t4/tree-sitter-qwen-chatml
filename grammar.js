@@ -24,19 +24,13 @@ export default grammar({
   rules: {
     source_file: $ => choice(
       repeat($.message),
-      $.fim_prompt_file,
-      $.fim_completed_file,
+      $.fim_file,
     ),
 
-    fim_prompt_file: $ => seq(
-      $.fim_prefix, $.prefix_content,
-      $.fim_suffix, $.suffix_content,
-      $.fim_middle
-    ),
-    fim_completed_file: $ => seq(
-      $.fim_prefix, $.prefix_content,
-      $.fim_suffix, $.suffix_content,
-      $.fim_middle, $.middle_content
+    fim_file: $ => seq(
+      $.fim_prefix, optional($.prefix_content),
+      $.fim_suffix, optional($.suffix_content),
+      $.fim_middle, optional($.middle_content),
     ),
 
     message: $ => seq($.im_start, $.role, '\n', $.message_content, $.im_end),
