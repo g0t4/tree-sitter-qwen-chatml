@@ -1,5 +1,5 @@
 LANGUAGE_NAME := tree-sitter-qwen-chatml
-HOMEPAGE_URL := https://github.com/tree-sitter/tree-sitter-qwen_chatml
+HOMEPAGE_URL := https://github.com/g0t4/tree-sitter-qwen_chatml
 VERSION := 0.1.0
 
 # repository

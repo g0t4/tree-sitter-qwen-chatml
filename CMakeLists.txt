@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13)
 project(tree-sitter-qwen-chatml
         VERSION "0.1.0"
         DESCRIPTION "Parser for raw prompts and completions when working with Qwen models."
-        HOMEPAGE_URL "https://github.com/tree-sitter/tree-sitter-qwen_chatml"
+        HOMEPAGE_URL "https://github.com/g0t4/tree-sitter-qwen_chatml"
         LANGUAGES C)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)

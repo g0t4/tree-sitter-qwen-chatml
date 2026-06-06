@@ -1,4 +1,4 @@
-module github.com/tree-sitter/tree-sitter-qwen_chatml
+module github.com/g0t4/tree-sitter-qwen_chatml
 
 go 1.22
 
