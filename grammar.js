@@ -25,10 +25,12 @@ export default grammar({
     //   fim_message => (fim_prefix, fim_suffix, fim_middle),
     // ),
 
-    message: $ => seq($.im_start, $.message_content, $.im_end),
+    message: $ => seq($.im_start, $.role, '\n', $.message_content, $.im_end),
 
     // message_content: $ => repeat($.any), // TODO constrain this at all?
     message_content: $ => prec(-9, field("contents", $.text)),
+
+    role: $ => /[^\n]+/, // take until end of line
 
     text: $ => repeat1(choice(
       /[^<]+/, // be greedy with any other char (not <)

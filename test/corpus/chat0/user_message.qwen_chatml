@@ -8,6 +8,7 @@ What is the color of the sky?<|im_end|>
 (source_file
   (message
     (im_start)
+    (role)
     contents: (text)
     (im_end)))
 
