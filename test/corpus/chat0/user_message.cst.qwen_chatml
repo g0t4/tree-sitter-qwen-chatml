@@ -6,11 +6,10 @@ user message
 <|im_start|>user
 What is the color of the sky?<|im_end|>
 ---
-(source_file
-  (message
-    (im_start)
-    role: (role_name) 
-    contents: (text)
-    (im_end)))
-
-; BTW, :InspectTree in the (input) node is a great way to check expectations!
+0:0  - 1:39   source_file
+0:0  - 1:39     message
+0:0  - 0:12       im_start `<|im_start|>`
+0:12 - 0:16       role: role_name `user`
+0:16 - 1:0        "\n"
+1:0  - 1:29       contents: text `What is the color of the sky?`
+1:29 - 1:39       im_end `<|im_end|>`
