@@ -16,9 +16,9 @@ export default grammar({
   inline: $ => [
     $.role,
     $.message_content,
-    $.prefix_content,
-    $.suffix_content,
-    $.middle_content,
+    $.prefix,
+    $.suffix,
+    $.middle,
   ],
 
   rules: {
@@ -30,9 +30,9 @@ export default grammar({
     fim_file: $ => seq(
       // FIM does not require values to be provided for both prefix and suffix
       // - but, it wouldn't make much sense if neither are provided
-      $.fim_prefix, optional($.prefix_content),
-      $.fim_suffix, optional($.suffix_content),
-      $.fim_middle, optional($.middle_content),
+      $.fim_prefix, optional($.prefix),
+      $.fim_suffix, optional($.suffix),
+      $.fim_middle, optional($.middle),
     ),
 
     message: $ => seq($.im_start, $.role, '\n', $.message_content, $.im_end),
@@ -48,11 +48,11 @@ export default grammar({
       /</ // force decision on single < which means it is allowed too just only one char at a time
     )),
     fim_prefix: $ => token(constants.FIM_PREFIX),
-    prefix_content: $ => prec(-9, field("prefix_contents", $.text)),
+    prefix: $ => prec(-9, field("prefix", $.text)),
     fim_suffix: $ => token(constants.FIM_SUFFIX),
-    suffix_content: $ => prec(-9, field("suffix_contents", $.text)),
+    suffix: $ => prec(-9, field("suffix", $.text)),
     fim_middle: $ => token(constants.FIM_MIDDLE),
-    middle_content: $ => prec(-9, field("middle_contents", $.text)),
+    middle: $ => prec(-9, field("middle", $.text)),
 
     im_start: $ => token(constants.IM_START),
     im_end: $ => token(constants.IM_END),

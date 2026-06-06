@@ -17,6 +17,6 @@ end
 (source_file
   (fim_file
     (fim_prefix)
-    prefix_contents: (text)
+    prefix: (text)
     (fim_suffix)
     (fim_middle)))

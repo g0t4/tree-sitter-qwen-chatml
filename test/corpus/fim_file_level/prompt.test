@@ -19,7 +19,7 @@ return M<|fim_middle|>
 (source_file
   (fim_file
     (fim_prefix)
-    prefix_contents: (text)
+    prefix: (text)
     (fim_suffix)
-    suffix_contents: (text)
+    suffix: (text)
     (fim_middle)))

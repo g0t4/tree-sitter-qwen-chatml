@@ -10,5 +10,5 @@ return M<|fim_middle|>
   (fim_file
     (fim_prefix)
     (fim_suffix)
-    suffix_contents: (text)
+    suffix: (text)
     (fim_middle)))
