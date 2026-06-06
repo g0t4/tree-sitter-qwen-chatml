@@ -28,6 +28,8 @@ export default grammar({
     ),
 
     fim_file: $ => seq(
+      // FIM does not require values to be provided for both prefix and suffix
+      // - but, it wouldn't make much sense if neither are provided
       $.fim_prefix, optional($.prefix_content),
       $.fim_suffix, optional($.suffix_content),
       $.fim_middle, optional($.middle_content),
