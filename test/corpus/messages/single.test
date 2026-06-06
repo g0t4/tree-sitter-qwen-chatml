@@ -7,9 +7,9 @@ What is the color of the sky?<|im_end|>
 ---
 (source_file
   (message
-    (im_start)
+    (im_start_token)
     role: (role_name) 
     contents: (text)
-    (im_end)))
+    (im_end_token)))
 
 ; BTW, :InspectTree in the (input) node is a great way to check expectations!

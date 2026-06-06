@@ -20,9 +20,9 @@ end
 ---
 (source_file
   (fim_file
-    (fim_prefix)
+    (fim_prefix_token)
     prefix: (text)
-    (fim_suffix)
+    (fim_suffix_token)
     suffix: (text)
-    (fim_middle)
+    (fim_middle_token)
     middle: (text)))
