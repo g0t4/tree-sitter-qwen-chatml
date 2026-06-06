@@ -21,7 +21,7 @@ export default grammar({
     $.repo_name_value,
     $.file_contents,
     $.file_name,
-    $.think_contents,
+    $.reasoning,
   ],
 
   rules: {
@@ -52,10 +52,10 @@ export default grammar({
 
     think_open_token: $ => token(constants.THINK_OPEN),
     think_close_token: $ => token(constants.THINK_CLOSE),
-    think_contents: $ => prec(-9, field("contents", $.text)),
+    reasoning: $ => prec(-9, field("reasoning", $.text)),
     thoughts: $ => seq(
       $.think_open_token,
-      optional($.think_contents),
+      optional($.reasoning),
       $.think_close_token
     ),
 
