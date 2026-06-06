@@ -1,2 +1,14 @@
+==================
+user message
+:language(qwen_chatml)
+==================
 <|im_start|>user
 What is the color of the sky?<|im_end|>
+---
+(source_file
+  (message
+    (im_start)
+    contents: (text)
+    (im_end)))
+
+; BTW, :InspectTree in the (input) node is a great way to check expectations!
