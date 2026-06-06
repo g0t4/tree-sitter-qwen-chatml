@@ -22,7 +22,7 @@ export default grammar({
     $.file_contents,
     $.file_name,
     $.reasoning,
-    $.thoughts,
+    $.think_section_inlined,
   ],
 
   rules: {
@@ -43,7 +43,7 @@ export default grammar({
     message: $ => seq($.im_start_token,
       $.role,
       '\n',
-      optional($.thoughts),
+      optional($.think_section_inlined),
       $.message_content,
       $.im_end_token
     ),
@@ -54,7 +54,7 @@ export default grammar({
     think_open_token: $ => token(constants.THINK_OPEN),
     think_close_token: $ => token(constants.THINK_CLOSE),
     reasoning: $ => prec(-9, field("reasoning", $.text)),
-    thoughts: $ => seq(
+    think_section_inlined: $ => seq(
       $.think_open_token,
       optional($.reasoning),
       $.think_close_token
