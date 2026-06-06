@@ -1,3 +1,7 @@
+==================
+completed repo level FIM
+:language(qwen_chatml)
+==================
 <|repo_name|>ask-openai.nvim
 <|file_sep|>instructions.txt
 General project code rules:
@@ -31,3 +35,40 @@ end
 
 
 return M<|fim_middle|>a + b
+---
+(source_file
+  (fim_repo
+    (repo_name
+      (repo_name_token)
+      name: (until_end_of_line))
+    (repo_file
+        (file_sep_token)
+        path: (until_end_of_line)
+        contents: (text)
+    )
+    (repo_file
+        (file_sep_token)
+        path: (until_end_of_line)
+        contents: (text)
+    )
+    (repo_file
+        (file_sep_token)
+        path: (until_end_of_line)
+        contents: (text)
+    )
+    (repo_file
+        (file_sep_token)
+        path: (until_end_of_line)
+        contents: (text)
+    )
+    (repo_file
+        (file_sep_token)
+        path: (until_end_of_line)
+    )
+    (fim_file
+      (fim_prefix)
+      prefix: (text)
+      (fim_suffix)
+      suffix: (text)
+      (fim_middle)
+      middle: (text))))

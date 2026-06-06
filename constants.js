@@ -6,6 +6,9 @@ export const FIM_PREFIX = '<|fim_prefix|>'
 export const FIM_SUFFIX = '<|fim_suffix|>'
 export const FIM_MIDDLE = '<|fim_middle|>'
 
+export const REPO_NAME = '<|repo_name|>'
+export const FILE_SEP = '<|file_sep|>'
+
 export const THINK_OPEN = '<think>'
 export const THINK_CLOSE = '</think>'
 
