@@ -14,7 +14,6 @@ export default grammar({
 
   inline: $ => [
     $.role,
-    $.message_content,
     $.prefix,
     $.suffix,
     $.middle,
@@ -43,7 +42,7 @@ export default grammar({
       $.role,
       '\n',
       optional($.think_section_inlined),
-      $.message_content,
+      prec(-9, field("contents", $.text)),
       $.im_end_token
     ),
 
@@ -57,7 +56,6 @@ export default grammar({
       $.think_close_token
     ),
 
-    message_content: $ => prec(-9, field("contents", $.text)),
 
     text: $ => repeat1(choice(
       /[^<]+/, // be greedy with any other char (not <)
