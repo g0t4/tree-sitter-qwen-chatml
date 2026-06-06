@@ -24,11 +24,13 @@ export default grammar({
   rules: {
     source_file: $ => choice(
       repeat($.message),
-      seq(
-        $.fim_prefix, $.prefix_content,
-        $.fim_suffix, $.suffix_content,
-        $.fim_middle, optional($.middle_content)
-      ),
+      $.fim_file,
+    ),
+
+    fim_file: $ => seq(
+      $.fim_prefix, $.prefix_content,
+      $.fim_suffix, $.suffix_content,
+      $.fim_middle, optional($.middle_content)
     ),
 
     message: $ => seq($.im_start, $.role, '\n', $.message_content, $.im_end),

@@ -19,9 +19,10 @@ return M<|fim_middle|>function M.mul(a, b)
 end
 ---
 (source_file
-  (fim_prefix)
-  prefix_contents: (text)
-  (fim_suffix)
-  suffix_contents: (text)
-  (fim_middle)
-  middle_contents: (text))
+  (fim_file
+    (fim_prefix)
+    prefix_contents: (text)
+    (fim_suffix)
+    suffix_contents: (text)
+    (fim_middle)
+    middle_contents: (text)))
