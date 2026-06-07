@@ -1,0 +1,36 @@
+(source_file
+  (message
+    (im_start_token)
+    role: (until_end_of_line) 
+    contents: (text)
+    (im_end_token))
+  (message
+    (im_start_token)
+    role: (until_end_of_line) 
+    contents: (text)
+    (im_end_token))
+  (message
+    (im_start_token)
+    role: (until_end_of_line) 
+    (think_open_tag)
+    reasoning: (text) 
+    (think_close_tag) ; TODO tool_call must come after optional think ... think cannot be after tool_call
+    ; TODO allow whitespace in between </think>\n \n<tool_call>
+    (tool_call_open_tag)
+    ; ... TODO
+    (tool_call_open_tag)
+    contents: (text)
+    ; TODO allow \n after </tool_call>\n<|im_end|>
+    (im_end_token))
+  (message
+    (im_start_token)
+    role: (until_end_of_line) 
+    contents: (text)
+    (im_end_token))
+  (message
+    (im_start_token)
+    role: (until_end_of_line) 
+    (think_open_tag)
+    reasoning: (text) 
+    (think_close_tag)
+    contents: (text)))

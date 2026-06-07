@@ -12,6 +12,15 @@ export const FILE_SEP = '<|file_sep|>'
 export const THINK_OPEN = '<think>'
 export const THINK_CLOSE = '</think>'
 
+export const TOOLS_OPEN = '<tools>'
+export const TOOLS_CLOSE = '</tools>'
+
+export const TOOL_CALL_OPEN = '<tool_call>'
+export const TOOL_CALL_CLOSE = '</tool_call>'
+
+export const TOOL_RESPONSE_OPEN = '<tool_response>'
+export const TOOL_RESPONSE_CLOSE = '</tool_response>'
+
 // TODO tool definitions?
 // TODO tool call xml format
 

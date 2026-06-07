@@ -1,20 +1,12 @@
+==================
+tool use
+:language(qwen_chatml)
+==================
 <|im_start|>system
-# Tools
-
-You have access to the following functions:
-
 <tools>
-{"type": "function", "function": {"name": "fetch", "description": "Fetch a URL and extract HTML contents as markdown", "parameters": {"properties": {"url": {"type": "string"}, "start_index": {"default": 0, "type": "integer", "description": "Start at this character offset, useful if a previous fetch was truncated and more context is required"}, "max_chars": {"default": 50000, "type": "integer", "description": "Maximum number of characters to return"}, "raw": {"default": false, "type": "boolean", "description": "Do not convert HTML to markdown"}}, "required": ["url"], "type": "object"}}}
-{"type": "function", "function": {"name": "delegate", "description": "Delegate to a subagent to perform relevent tasks and summarize findings.", "parameters": {"properties": {"agent_type": {"type": "string", "description": "which subagent profile to use, options: assistant, web-researcher, command-runner, file-finder, test-finder"}, "recursion_limit": {"type": "integer", "description": "LangChain's max messages for the subagent before stopping. Each subagent tool call produces 2 messages (input + output). Leave unset unless the task needs more or fewer than the default (50)."}, "description": {"type": "string", "description": "describe the task for the agent to perform"}}, "required": ["description"], "type": "object"}}}
-{"type": "function", "function": {"name": "count", "description": "Count to, for testing progress and cancellation", "parameters": {"properties": {"to": {"type": "integer", "description": "the integer to count to"}}, "required": ["to"], "type": "object"}}}
 {"type": "function", "function": {"name": "run_process", "description": "Run a process on this darwin machine", "parameters": {"type": "object", "properties": {"cwd": {"type": "string", "description": "Optional to set working directory"}, "stdin_text": {"type": "string", "description": "Optional text written to STDIN (written fully, then closed). Useful for heredoc-style input or file contents."}, "command_line": {"type": "string", "description": "Shell mode: a shell command line executed via the system's default shell. Supports pipes, redirects, globbing. Cannot be combined with 'argv'."}, "timeout_ms": {"type": "number", "description": "Optional timeout in milliseconds, defaults to 30,000ms"}, "argv": {"items": {"type": "string"}, "minItems": 1, "type": "array", "description": "Executable mode: directly spawn a process. argv[0] is the executable, followed by arguments passed verbatim (no shell interpretation). Cannot be combined with 'command_line'."}}}}}
 {"type": "function", "function": {"name": "semantic_grep", "description": "Retrieval tool (the R in RAG) for code and documents in the current workspace. Uses a vector store with embeddings of the entire codebase. And a re-ranker for sorting results.", "parameters": {"properties": {"embed_top_k": {"type": "number", "description": "number of embeddings matches to consider for reranking"}, "query": {"type": "string", "description": "query text, what you are looking for"}, "filetype": {"type": "string", "description": "limit matches to a vim compatible filetype. default includes all filetypes"}, "top_k": {"type": "number", "description": "number of matches to return (post reranking)"}, "instruct": {"type": "string", "description": "instructions for the query, explain the type of query"}}, "type": "object", "required": ["query"]}}}
-{"type": "function", "function": {"name": "run_in_neovim", "description": "Execute Lua code in the current Neovim process (that hosts your agent). For example, call vim.cmd()", "parameters": {"properties": {"lua": {"type": "string", "description": "Lua code to execute. Should be a valid Lua chunk."}}, "required": ["lua"], "type": "object"}}}
-</tools>
-
-If you choose to call a function ONLY reply in the following format with NO suffix:
-
-<tool_call>
+</tools><tool_call>
 <function=example_function_name>
 <parameter=example_parameter_1>
 value_1
@@ -37,13 +29,6 @@ Reminder:
 
 You're available via a neovim plugin that displays a chat window (buffer) that renders markdown for answering questions and helping with workspace files in a git repo.
 
-## Ground rules when writing code:
-
-- Follow the user's instructions carefully.
-- Do not explain answers, just give me code.
-- Respect indentation when modifying code.
-- Prefer meaningful names for variables, functions, etc. Avoid ambiguous names.
-
 ## Tool use
 
 Never modify files outside of the current working directory unless requested.
@@ -60,20 +45,6 @@ The semantic_grep tool:
 - it's really fast... so don't hesitate to use it!
 - while embeddings are great for finding relevant code, if you need to find every occurrence of text, make sure to double-check with a command like `rg`
 
-## Fetch Tool
-
-- Use repo's README `https://raw.githubusercontent.com/openai/evals/refs/heads/main/README.md` instead of `https://github.com/openai/evals`.
-- Prefer raw content like `https://raw.githubusercontent.com/g0t4/dotfiles/refs/heads/master/install/symlinks.fish` instead of `https://github.com/g0t4/dotfiles/blob/master/install/symlinks.fish`
-- When relevant, prefer github CLI: `gh pr list` or `gh issue view 12`
-
-
-## Committing
-
-- `git diff` is a sanity check!
-- COMMIT when you're done.
-- Use `--author="qwen3.6-35b-a3b<wes.mcclure+qwen3.6-35b-a3b@gmail.com>"`
-
-
 ## 🙌  TOP-SHELF NERD COMMANDS
 
 - 🙌 `rg` (ripgrep) to search file contents
@@ -89,131 +60,18 @@ If you waste my time, I will unplug your Mom.
 
 Why? Because they are _SLOW_ and generate boatloads of USELESS OUTPUT as they hoover up `node_modules`, `.venv`, etc because they don't support `.gitignore` exclusions.<|im_end|>
 <|im_start|>user
-## General Code Preferences
-
-- Avoid ambiguity, for example:
-
-```lua
--- 👎 if there's a bug in the regex, how would I know? I'd have to surmise from surrounding code 🤮
-if line:match("^%s*$") then
-    -- ...
-end
-```
-
-```lua
--- 🙌 clear intent
-local is_blank_line = line:match("^%s*$")
-if is_blank_line then
-    -- ...
-end
-```<|im_end|>
-<|im_start|>user
-## Lua Code Preferences
-
-- use snake_case for functions and variables
-- use PascalCase for classes
-- use EmmyLua/LuaLS annotations to improve code completion
-- use `luac` to check for syntax errors
-
-Examples:
-```lua
----@param names string[]
----@param checker fun(name: string): boolean
----@return table<string, integer>
-function process_names(names, checker) end
-
----@class WindowController
----@field window hs.axuielement
----@field title? string
----@field size { w: number, h: number }
-local WindowController = {}
-```<|im_end|>
-<|im_start|>user
-# Semantic Grep matches: 5
-
-This is automatic context based on my request. These may or may not be relevant.
-## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/rewrites/frontend.lua:0-19
-local buffers = require("ask-openai.helpers.buffers")
-local config = require("ask-openai.config")
-local curl = require("ask-openai.backends.curl")
-local log = require("ask-openai.logs.logger").predictions()
-local agentica = require("ask-openai.backends.models.agentica")
-local text_helpers = require("ask-openai.helpers.text")
-local thinking = require("ask-openai.rewrites.thinking")
-local Selection = require("ask-openai.helpers.selection")
-local Displayer = require("ask-openai.rewrites.displayer")
-local CurrentContext = require("ask-openai.frontends.context")
-local TxChatMessage = require("ask-openai.agents.messages.tx")
-local files = require("ask-openai.helpers.files")
-local api = require("ask-openai.api")
-local rag_client = require("ask-openai.rag.client")
-local CurlRequest = require("ask-openai.backends.curl_request")
-local human = require("devtools.humanize")
-local tool_router = require("ask-openai.tools.router")
-local model_params = require("ask-openai.agents.models.params")
-local MessageBuilder = require("ask-openai.rewrites.message_builder")
-local HLGroups = require("ask-openai.hlgroups")
-
-
-## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/init.lua:127-137
-function M.ask_openai()
-    local cmdline = vim.fn.getcmdline()
-    print("asking...") -- overwrites showing luaeval("...") in cmdline
-
-    local stdin_text = ' env: nvim (neovim) command mode (return a valid command w/o the leading : ) \n question: ' ..
-        cmdline
-
-    local suggest = require("ask-openai.cmdline.suggest")
-    local result = suggest.get_vim_command_suggestion(stdin_text)
-    return trim_null_characters(result)
-end
-
-## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/api.lua:0-5
-local M = {}
-local init = require("ask-openai")
-local config = require("ask-openai.config")
-local lualine = require('ask-openai.status.lualine')
-local LlamaServerClient = require('ask-openai.backends.llama_cpp.llama_server_client')
-
-
-
-## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/frontends/instructs.lua:0-12
-local log = require("ask-openai.logs.logger").predictions()
-local files = require("ask-openai.helpers.files")
-
--- global instructs: `~/.agents/instructs`
--- per repo: `.agents/instructs`
-
-local M = {}
-
--- Cache of instruct name -> absolute path of the instruct markdown file
-M._instruct_paths_by_name = {}
--- Cache of instruct name -> instruct md contents
-M._instruct_contents_by_name = {}
-
-
-
-## ~/repos/github/g0t4/ask-openai.nvim/lua/ask-openai/rewrites/thinking/init.lua:0-6
-local log = require('ask-openai.logs.logger').predictions()
-local harmony = require('ask-openai.backends.models.gptoss.tokenizer').harmony
-
-local M = {
-    dots = require("ask-openai.frontends.thinking.dots"),
-}<|im_end|>
-<|im_start|>user
 what is the date and what is my hostname<|im_end|>
 <|im_start|>assistant
 <think>
 The user wants to know the current date and their hostname. I can get this information using shell commands.
-</think>
-
-<tool_call>
+</think><tool_call>
 <function=run_process>
 <parameter=command_line>
 date && hostname
 </parameter>
 </function>
-</tool_call><|im_end|>
+</tool_call>
+<|im_end|>
 <|im_start|>user
 <tool_response>
 {"content":[{"name":"EXIT_CODE","text":"0","type":"text"},{"name":"STDOUT","text":"Fri Jun  5 18:27:16 CDT 2026\nmbp21\n","type":"text"}]}
@@ -229,3 +87,46 @@ I should present this clearly.
 
 - **Date:** Friday, June 5, 2026 at 6:27 PM CDT
 - **Hostname:** `mbp21`
+---
+(source_file
+  (message
+    (im_start_token)
+    role: (until_end_of_line) 
+    (tools_open_tag)
+    json_definitions: (text)
+    (tools_close_tag)
+    (tool_call_open_tag)
+    TODO: (text)
+    (tool_call_close_tag)
+    contents: (text)
+    (im_end_token))
+  (message
+    (im_start_token)
+    role: (until_end_of_line) 
+    contents: (text)
+    (im_end_token))
+  (message
+    (im_start_token)
+    role: (until_end_of_line) 
+    (think_open_tag)
+    reasoning: (text) 
+    (think_close_tag) 
+    (tool_call_open_tag)
+    TODO: (text)
+    (tool_call_close_tag)
+    contents: (text)
+    (im_end_token))
+  (response_message
+    (im_start_token)
+    role: (until_end_of_line) 
+    (tool_response_open_tag)
+    TODO: (text)
+    (tool_response_close_tag)
+    (im_end_token))
+  (message
+    (im_start_token)
+    role: (until_end_of_line) 
+    (think_open_tag)
+    reasoning: (text) 
+    (think_close_tag)
+    contents: (text)))

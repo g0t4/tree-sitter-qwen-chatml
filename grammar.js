@@ -14,18 +14,37 @@ export default grammar({
 
   inline: $ => [
     $.repo_name_group,
+    $.tools_group,
+    $.think_group,
+    $.tool_call_group,
+    $.tool_response_group,
     // logical grouping (not actual nodes)
   ],
 
   rules: {
     source_file: $ => choice(
       choice(
-        repeat($.message), // only full messages
+        repeat(
+          choice($.message, $.response_message) // TODO reuse with repeat->choice below too
+        ), // only full messages
         $.prefill_message, // only a prefill message (kinda weird though)
-        seq(repeat($.message), $.prefill_message), // full messages and then prefill on end (this is realisitic scenario for assistant prefill)
+        seq(
+          repeat(
+            choice($.message, $.response_message)
+          ),
+          $.prefill_message), // full messages and then prefill on end (this is realisitic scenario for assistant prefill)
       ),
       $.fim_file_level,
       $.fim_repo_level,
+    ),
+
+    response_message: $ => seq(
+      $.im_start_token,
+      field("role", $.until_end_of_line), // greedy, take until end of line
+      '\n',
+
+      $.tool_response_group,
+      optional($.im_end_token) // FYI this should only be if it is the last message but not gonna bother with that constraint for now
     ),
 
     message: $ => seq(
@@ -33,15 +52,15 @@ export default grammar({
       field("role", $.until_end_of_line), // greedy, take until end of line
       '\n',
 
-      // thinking:
-      optional(seq(
-        $.think_open_token,
-        optional(prec(-9, field("reasoning", $.text))),
-        $.think_close_token
-      )),
+      // thinking (must come before tool_call request)
+      optional($.think_group),
+      optional($.tools_group),
 
-      prec(-9, field("contents", $.text)),
-      $.im_end_token
+      // TODO "contents" before tool_call (see system prompt) => adjust system prompt to add back default
+      optional($.tool_call_group),
+
+      prec(-9, field("contents", $.text)), // TODO not contents2
+      optional($.im_end_token) // FYI this should only be if it is the last message but not gonna bother with that constraint for now
     ),
 
     prefill_message: $ => seq(
@@ -49,9 +68,13 @@ export default grammar({
       field("role", $.until_end_of_line),
     ),
 
-
-    think_open_token: $ => token(constants.THINK_OPEN),
-    think_close_token: $ => token(constants.THINK_CLOSE),
+    think_group: $ => seq(
+      $.think_open_tag,
+      optional(prec(-9, field("reasoning", $.text))),
+      $.think_close_tag
+    ),
+    think_open_tag: $ => token(constants.THINK_OPEN),
+    think_close_tag: $ => token(constants.THINK_CLOSE),
 
     fim_file_level: $ => seq(
       $.fim_prefix_token,
@@ -88,6 +111,30 @@ export default grammar({
     fim_prefix_token: $ => token(constants.FIM_PREFIX),
     fim_suffix_token: $ => token(constants.FIM_SUFFIX),
     fim_middle_token: $ => token(constants.FIM_MIDDLE),
+
+    tools_group: $ => seq(
+      $.tools_open_tag,
+      optional(prec(-9, field("json_definitions", $.text))), // TODO tool call definitions (JSON) ... redo with JSON injection?
+      $.tools_close_tag
+    ),
+    tools_open_tag: $ => token(constants.TOOLS_OPEN),
+    tools_close_tag: $ => token(constants.TOOLS_CLOSE),
+
+    tool_call_group: $ => seq(
+      $.tool_call_open_tag,
+      optional(prec(-9, field("TODO", $.text))), // TODO 
+      $.tool_call_close_tag
+    ),
+    tool_call_open_tag: $ => token(constants.TOOL_CALL_OPEN),
+    tool_call_close_tag: $ => token(constants.TOOL_CALL_CLOSE),
+
+    tool_response_group: $ => seq(
+      $.tool_response_open_tag,
+      optional(prec(-9, field("TODO", $.text))), // TODO 
+      $.tool_response_close_tag
+    ),
+    tool_response_open_tag: $ => token(constants.TOOL_RESPONSE_OPEN),
+    tool_response_close_tag: $ => token(constants.TOOL_RESPONSE_CLOSE),
 
     im_start_token: $ => token(constants.IM_START),
     im_end_token: $ => token(constants.IM_END),
