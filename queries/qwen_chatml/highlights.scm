@@ -22,5 +22,6 @@
   ; (repo_file) @qwen_repo_file
   (file_sep_token) @qwen_file_sep_token
   path: (until_end_of_line) @qwen_file_path
-  contents: (text) @qwen_file_contents
+  (repo_file 
+    contents: (text)) @qwen_file_contents
 ]
