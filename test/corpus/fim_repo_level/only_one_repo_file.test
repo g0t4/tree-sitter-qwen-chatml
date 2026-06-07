@@ -1,8 +1,9 @@
 ==================
-only repo_name
+only one repo_file (no repo_name)
 :language(qwen_chatml)
 ==================
-<|repo_name|>ask-openai.nvim
+<|file_sep|>file1.md
+## file 1 contents
 <|fim_prefix|>local M = {}
 
 function M.add(a, b)
@@ -18,8 +19,10 @@ return M<|fim_middle|>a + b
 ---
 (source_file
   (fim_repo
-    (repo_name_token)
-    repo_name: (until_end_of_line)
+    (repo_file
+        (file_sep_token)
+        path: (until_end_of_line)
+        contents: (text))
     (fim_file
       (fim_prefix_token)
       prefix: (text)

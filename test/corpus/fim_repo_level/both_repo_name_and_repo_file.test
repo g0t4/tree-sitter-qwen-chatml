@@ -1,5 +1,6 @@
 ==================
-completed repo level FIM
+both repo_name + repo_files 
+- also has `middle` contents
 :language(qwen_chatml)
 ==================
 <|repo_name|>ask-openai.nvim

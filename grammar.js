@@ -80,8 +80,8 @@ export default grammar({
     fim_repo: $ => seq(
       choice(
         $.repo_name_group, // only repo_name
-        $.repo_file, // only one repo_file
-        seq($.repo_name_group, repeat($.repo_file)), // repo_name + 1+ repo_files 
+        repeat1($.repo_file), // 1+ repo_files
+        seq($.repo_name_group, repeat($.repo_file)), // repo_name AND 1+ repo_files 
       ),
       $.fim_file,
     ),
