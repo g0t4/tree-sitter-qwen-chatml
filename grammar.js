@@ -78,8 +78,11 @@ export default grammar({
 
     file_sep_token: $ => token(constants.FILE_SEP),
     fim_repo: $ => seq(
-      optional($.repo_name_group),
-      repeat1($.repo_file),
+      choice(
+        $.repo_name_group, // only repo_name
+        $.repo_file, // only one repo_file
+        seq($.repo_name_group, repeat($.repo_file)), // repo_name + 1+ repo_files 
+      ),
       $.fim_file,
     ),
 

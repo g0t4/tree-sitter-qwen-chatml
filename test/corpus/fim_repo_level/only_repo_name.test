@@ -1,0 +1,29 @@
+==================
+only provide repo_name
+:language(qwen_chatml)
+==================
+<|repo_name|>ask-openai.nvim
+<|fim_prefix|>local M = {}
+
+function M.add(a, b)
+    return <|fim_suffix|>
+end
+
+function M.sub(a, b)
+    return b
+end
+
+
+return M<|fim_middle|>a + b
+---
+(source_file
+  (fim_repo
+    (repo_name_token)
+    repo_name: (until_end_of_line)
+    (fim_file
+      (fim_prefix_token)
+      prefix: (text)
+      (fim_suffix_token)
+      suffix: (text)
+      (fim_middle_token)
+      middle: (text))))
