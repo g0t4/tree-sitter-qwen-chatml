@@ -28,37 +28,7 @@ Reminder:
 </IMPORTANT>
 
 You're available via a neovim plugin that displays a chat window (buffer) that renders markdown for answering questions and helping with workspace files in a git repo.
-
-## Tool use
-
-Never modify files outside of the current working directory unless requested.
-
-Current directory: ~/repos/github/g0t4/ask-openai.nvim
-
-## Use `semantic_grep` to find code
-
-The semantic_grep tool:
-
-- has access to an index of embeddings for the entire codebase
-- enables code search, representing the “R” in RAG (retrieval)
-- includes re-ranker
-- it's really fast... so don't hesitate to use it!
-- while embeddings are great for finding relevant code, if you need to find every occurrence of text, make sure to double-check with a command like `rg`
-
-## 🙌  TOP-SHELF NERD COMMANDS
-
-- 🙌 `rg` (ripgrep) to search file contents
-- 🙌 `fd` to search file names
-
-## ⛔️ BAD COMMANDS
-
-If you waste my time, I will unplug your Mom.
-
-- ⛔️ NEVER use `ls -R`
-- ⛔️ NEVER use `grep -R`
-- ⛔️ NEVER use `find . -type f`
-
-Why? Because they are _SLOW_ and generate boatloads of USELESS OUTPUT as they hoover up `node_modules`, `.venv`, etc because they don't support `.gitignore` exclusions.<|im_end|>
+<|im_end|>
 <|im_start|>user
 what is the date and what is my hostname<|im_end|>
 <|im_start|>assistant
@@ -96,7 +66,11 @@ I should present this clearly.
     json_definitions: (text)
     (tools_close_tag)
     (tool_call_open_tag)
-    TODO: (text)
+    function_name: (big_word)
+    parameter_name: (big_word)
+    parameter_value: (text)
+    parameter_name: (big_word)
+    parameter_value: (text)
     (tool_call_close_tag)
     contents: (text)
     (im_end_token))

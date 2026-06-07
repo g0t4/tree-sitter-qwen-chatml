@@ -120,10 +120,22 @@ export default grammar({
     tools_open_tag: $ => token(constants.TOOLS_OPEN),
     tools_close_tag: $ => token(constants.TOOLS_CLOSE),
 
+    // <tool_call>
+    // <function=run_process>
+    // <parameter=command_line>
+    // date && hostname
+    // </parameter>
+    // </function>
+    // </tool_call>
     tool_call_group: $ => seq(
-      $.tool_call_open_tag,
-      optional(prec(-9, field("TODO", $.text))), // TODO 
-      $.tool_call_close_tag
+      $.tool_call_open_tag, "\n",
+      "<function=", field("function_name", $.big_word), ">\n",
+      repeat(seq("<parameter=", field("parameter_name", $.big_word), ">",
+        field("parameter_value", $.text),
+        "</parameter>",
+      )),
+      "</function>\n",
+      $.tool_call_close_tag, "\n",
     ),
     tool_call_open_tag: $ => token(constants.TOOL_CALL_OPEN),
     tool_call_close_tag: $ => token(constants.TOOL_CALL_CLOSE),
@@ -144,6 +156,7 @@ export default grammar({
       /[^<]+/, // be greedy with any other char (not <)
       /</ // force decision on single < which means it is allowed too just only one char at a time
     )),
+    big_word: $ => repeat1(/[A-Za-z0-9_]+/),
 
   }
 });
