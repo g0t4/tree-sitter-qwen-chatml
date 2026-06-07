@@ -148,7 +148,7 @@ export default grammar({
 
     tool_response_group: $ => seq(
       $.tool_response_open_tag,
-      optional(prec(-9, field("TODO", $.text))), // TODO 
+      optional(prec(-9, field("json", $.text))), // TODO can this be non-json?
       $.tool_response_close_tag
     ),
     tool_response_open_tag: $ => token(constants.TOOL_RESPONSE_OPEN),

@@ -99,7 +99,7 @@ I should present this clearly.
     (im_start_token)
     role: (until_end_of_line) 
     (tool_response_open_tag)
-    TODO: (text)
+    json: (text)
     (tool_response_close_tag)
     (im_end_token))
   (message
