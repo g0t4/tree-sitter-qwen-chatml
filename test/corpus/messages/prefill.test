@@ -10,9 +10,9 @@ What is the color of the sky?<|im_end|>
 (source_file
   (message
     (im_start_token)
-    role: (until_end_of_line) 
+    (user_role)
     contents: (text)
     (im_end_token))
   (prefill_message
     (im_start_token)
-    role: (until_end_of_line)))
+    (assistant_role)))

@@ -20,6 +20,7 @@ export default grammar({
     $.tool_call_group,
     $.tool_response_group,
     $.full_messages_group,
+    $.roles_group,
   ],
 
   rules: {
@@ -40,18 +41,32 @@ export default grammar({
 
     tool_response_message: $ => seq(
       $.im_start_token,
-      field("role", $.until_end_of_line), // greedy, take until end of line
+      // $.tool_role,
+      $.roles_group, // allow any role, just in case, doesn't hurt
       '\n',
 
       $.tool_response_group,
       optional($.im_end_token) // FYI this should only be if it is the last message but not gonna bother with that constraint for now
     ),
 
+    user_role: $ => field("role", "user"),
+    tool_role: $ => field("role", "tool"),
+    assistant_role: $ => field("role", "assistant"),
+    system_role: $ => field("role", "system"),
+    developer_role: $ => field("role", "developer"),
+
+    roles_group: $ => choice(
+      $.user_role,
+      $.tool_role,
+      $.assistant_role,
+      $.system_role,
+      $.developer_role,
+      field("role", $.until_end_of_line), // greedy, take until end of line
+    ),
+
     message: $ => seq(
       $.im_start_token,
-      choice(
-        field("role", $.until_end_of_line) // greedy, take until end of line
-      ),
+      $.roles_group,
       '\n',
 
       // thinking (must come before tool_call request)
@@ -68,7 +83,7 @@ export default grammar({
 
     prefill_message: $ => seq(
       $.im_start_token,
-      field("role", $.until_end_of_line),
+      $.roles_group,
     ),
 
     think_group: $ => seq(

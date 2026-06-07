@@ -42,7 +42,7 @@ date && hostname
 </function>
 </tool_call>
 <|im_end|>
-<|im_start|>user
+<|im_start|>tool
 <tool_response>
 {"content":[{"name":"EXIT_CODE","text":"0","type":"text"},{"name":"STDOUT","text":"Fri Jun  5 18:27:16 CDT 2026\nmbp21\n","type":"text"}]}
 </tool_response><|im_end|>
@@ -62,7 +62,7 @@ I should present this clearly.
 (source_file
   (message
     (im_start_token)
-    role: (until_end_of_line) 
+    (system_role)
     (tools_open_tag)
     json_definitions: (text)
     (tools_close_tag)
@@ -79,12 +79,12 @@ I should present this clearly.
     (im_end_token))
   (message
     (im_start_token)
-    role: (until_end_of_line) 
+    (user_role)
     contents: (text)
     (im_end_token))
   (message
     (im_start_token)
-    role: (until_end_of_line) 
+    (assistant_role)
     (think_open_tag)
     reasoning: (text) 
     (think_close_tag) 
@@ -97,14 +97,14 @@ I should present this clearly.
     (im_end_token))
   (tool_response_message
     (im_start_token)
-    role: (until_end_of_line) 
+    (tool_role)
     (tool_response_open_tag)
     json: (text)
     (tool_response_close_tag)
     (im_end_token))
   (message
     (im_start_token)
-    role: (until_end_of_line) 
+    (assistant_role)
     (think_open_tag)
     reasoning: (text) 
     (think_close_tag)
