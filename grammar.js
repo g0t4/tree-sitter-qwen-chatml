@@ -44,13 +44,6 @@ export default grammar({
     think_open_token: $ => token(constants.THINK_OPEN),
     think_close_token: $ => token(constants.THINK_CLOSE),
 
-
-    until_end_of_line: $ => repeat1(/[^\n]+/), // until end of line
-    text: $ => repeat1(choice(
-      /[^<]+/, // be greedy with any other char (not <)
-      /</ // force decision on single < which means it is allowed too just only one char at a time
-    )),
-
     fim_file_level: $ => seq(
       $.fim_prefix_token,
       optional(prec(-9, field("prefix", $.text))),
@@ -83,7 +76,6 @@ export default grammar({
       optional("\n"),
       optional(prec(-9, field("contents", $.text)))),
 
-
     fim_prefix_token: $ => token(constants.FIM_PREFIX),
     fim_suffix_token: $ => token(constants.FIM_SUFFIX),
     fim_middle_token: $ => token(constants.FIM_MIDDLE),
@@ -91,6 +83,12 @@ export default grammar({
     im_start_token: $ => token(constants.IM_START),
     im_end_token: $ => token(constants.IM_END),
     // final_token: $ => choice($.im_end, $.return_token, $.call_token) // TODO more than one stop/end token I care about for my parser?
+
+    until_end_of_line: $ => repeat1(/[^\n]+/), // until end of line
+    text: $ => repeat1(choice(
+      /[^<]+/, // be greedy with any other char (not <)
+      /</ // force decision on single < which means it is allowed too just only one char at a time
+    )),
 
   }
 });
