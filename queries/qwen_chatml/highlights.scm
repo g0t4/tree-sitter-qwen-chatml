@@ -1,10 +1,15 @@
 [
   (message
+    (system_role)) @qwen_system_message
+  (message
+    (developer_role)) @qwen_developer_message
+  (message
     (user_role)) @qwen_user_message
   (message
     (assistant_role)) @qwen_assistant_message
+  (tool_response_message) @qwen_tool_response_message
   (message
-    (system_role)) @qwen_system_message
+    role: (until_end_of_line))
 ]
 
 [
