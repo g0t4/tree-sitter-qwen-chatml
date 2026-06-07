@@ -9,7 +9,7 @@
     (assistant_role)) @qwen_assistant_message
   (tool_response_message) @qwen_tool_response_message
   (message
-    role: (until_end_of_line))
+    role: (until_end_of_line)) @qwen_all_other_roles_message
 ]
 
 [
