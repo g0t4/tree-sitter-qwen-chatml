@@ -117,7 +117,8 @@ export default grammar({
     tools_group: $ => seq(
       $.tools_open_tag,
       optional(prec(-9, field("json_definitions", $.text))), // TODO tool call definitions (JSON) ... redo with JSON injection?
-      $.tools_close_tag
+      $.tools_close_tag,
+      optional("\n"),
     ),
     tools_open_tag: $ => token(constants.TOOLS_OPEN),
     tools_close_tag: $ => token(constants.TOOLS_CLOSE),
@@ -134,22 +135,29 @@ export default grammar({
       "<function=", field("function_name", $.big_word), ">\n",
       repeat($.parameter),
       "</function>\n",
-      $.tool_call_close_tag, "\n",
+      $.tool_call_close_tag,
+      optional("\n"),
     ),
     parameter: $ => seq(
       "<parameter=",
       field("name", $.big_word),
       ">",
+      optional("\n"),
       field("value", $.text),
-      "</parameter>\n"
+      optional("\n"),
+      "</parameter>",
+      optional("\n"),
     ),
     tool_call_open_tag: $ => token(constants.TOOL_CALL_OPEN),
     tool_call_close_tag: $ => token(constants.TOOL_CALL_CLOSE),
 
     tool_response_group: $ => seq(
       $.tool_response_open_tag,
+      optional("\n"),
       optional(prec(-9, field("json", $.text))), // TODO can this be non-json?
-      $.tool_response_close_tag
+      optional("\n"),
+      $.tool_response_close_tag,
+      optional("\n"),
     ),
     tool_response_open_tag: $ => token(constants.TOOL_RESPONSE_OPEN),
     tool_response_close_tag: $ => token(constants.TOOL_RESPONSE_CLOSE),
