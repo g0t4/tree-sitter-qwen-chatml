@@ -13,13 +13,13 @@ export default grammar({
   name: "qwen_chatml",
 
   inline: $ => [
+    // logical grouping (not actual nodes)
     $.repo_name_group,
     $.tools_group,
     $.think_group,
     $.tool_call_group,
     $.tool_response_group,
     $.full_messages_group,
-    // logical grouping (not actual nodes)
   ],
 
   rules: {
@@ -29,7 +29,7 @@ export default grammar({
         $.prefill_message, // only a prefill message (kinda weird though)
         seq(
           $.full_messages_group,
-          $.prefill_message
+          $.prefill_message // prefill after full message(s)
         )
       ),
       $.fim_file_level,
