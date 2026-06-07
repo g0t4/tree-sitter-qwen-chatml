@@ -67,12 +67,6 @@ export default grammar({
       optional(prec(-9, field("middle", $.text))),
     ),
 
-    repo_file: $ => seq(
-      $.file_sep_token,
-      prec(-9, field("path", $.until_end_of_line)),
-      optional("\n"),
-      optional(prec(-9, field("contents", $.text)))),
-
     file_sep_token: $ => token(constants.FILE_SEP),
     fim_repo_level: $ => seq(
       choice(
@@ -82,6 +76,13 @@ export default grammar({
       ),
       $.fim_file_level,
     ),
+
+    repo_file: $ => seq(
+      $.file_sep_token,
+      prec(-9, field("path", $.until_end_of_line)),
+      optional("\n"),
+      optional(prec(-9, field("contents", $.text)))),
+
 
     fim_prefix_token: $ => token(constants.FIM_PREFIX),
     fim_suffix_token: $ => token(constants.FIM_SUFFIX),
