@@ -1,4 +1,13 @@
 [
+  (message
+    (user_role)) @qwen_user_message
+  (message
+    (assistant_role)) @qwen_assistant_message
+  (message
+    (system_role)) @qwen_system_message
+]
+
+[
   (fim_prefix_token) @qwen_fim_prefix_token
   prefix: (text) @qwen_fim_prefix_contents
 ]
@@ -22,6 +31,6 @@
   ; (repo_file) @qwen_repo_file
   (file_sep_token) @qwen_file_sep_token
   path: (until_end_of_line) @qwen_file_path
-  (repo_file 
+  (repo_file
     contents: (text)) @qwen_file_contents
 ]

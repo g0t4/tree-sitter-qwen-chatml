@@ -21,6 +21,7 @@ export default grammar({
     $.tool_response_group,
     $.full_messages_group,
     $.roles_group,
+    $.all_other_roles,
   ],
 
   rules: {
@@ -55,13 +56,15 @@ export default grammar({
     system_role: $ => field("role", "system"),
     developer_role: $ => field("role", "developer"),
 
+    all_other_roles: $ => field("role", $.until_end_of_line), // greedy, take until end of line
+
     roles_group: $ => choice(
       $.user_role,
       $.tool_role,
       $.assistant_role,
       $.system_role,
       $.developer_role,
-      field("role", $.until_end_of_line), // greedy, take until end of line
+      $.all_other_roles,
     ),
 
     message: $ => seq(
