@@ -95,7 +95,7 @@ I should present this clearly.
       value: (text))
     (tool_call_close_tag)
     (im_end_token))
-  (response_message
+  (tool_response_message
     (im_start_token)
     role: (until_end_of_line) 
     (tool_response_open_tag)

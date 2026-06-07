@@ -36,9 +36,9 @@ export default grammar({
       $.fim_repo_level,
     ),
 
-    full_messages_group: $ => repeat1(choice($.message, $.response_message)),
+    full_messages_group: $ => repeat1(choice($.message, $.tool_response_message)),
 
-    response_message: $ => seq(
+    tool_response_message: $ => seq(
       $.im_start_token,
       field("role", $.until_end_of_line), // greedy, take until end of line
       '\n',
