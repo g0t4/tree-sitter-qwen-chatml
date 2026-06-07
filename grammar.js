@@ -82,7 +82,6 @@ export default grammar({
 
     im_start_token: $ => token(constants.IM_START),
     im_end_token: $ => token(constants.IM_END),
-    // final_token: $ => choice($.im_end, $.return_token, $.call_token) // TODO more than one stop/end token I care about for my parser?
 
     until_end_of_line: $ => repeat1(/[^\n]+/), // until end of line
     text: $ => repeat1(choice(
