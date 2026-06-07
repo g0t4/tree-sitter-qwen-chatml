@@ -24,8 +24,8 @@ export default grammar({
       $.fim_repo_level,
     ),
 
-
-    message: $ => seq($.im_start_token,
+    message: $ => seq(
+      $.im_start_token,
       field("role", $.until_end_of_line), // greedy, take until end of line
       '\n',
 
@@ -39,7 +39,6 @@ export default grammar({
       prec(-9, field("contents", $.text)),
       $.im_end_token
     ),
-
 
     think_open_token: $ => token(constants.THINK_OPEN),
     think_close_token: $ => token(constants.THINK_CLOSE),
