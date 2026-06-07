@@ -18,25 +18,25 @@ export default grammar({
     $.think_group,
     $.tool_call_group,
     $.tool_response_group,
+    $.full_messages_group,
     // logical grouping (not actual nodes)
   ],
 
   rules: {
     source_file: $ => choice(
       choice(
-        repeat(
-          choice($.message, $.response_message) // TODO reuse with repeat->choice below too
-        ), // only full messages
+        $.full_messages_group, // only full messages
         $.prefill_message, // only a prefill message (kinda weird though)
         seq(
-          repeat(
-            choice($.message, $.response_message)
-          ),
-          $.prefill_message), // full messages and then prefill on end (this is realisitic scenario for assistant prefill)
+          $.full_messages_group,
+          $.prefill_message
+        )
       ),
       $.fim_file_level,
       $.fim_repo_level,
     ),
+
+    full_messages_group: $ => repeat1(choice($.message, $.response_message)),
 
     response_message: $ => seq(
       $.im_start_token,
