@@ -15,8 +15,8 @@ export default grammar({
   inline: $ => [
     // logical grouping (not actual nodes)
     $.repo_name_group,
-    $.tools_group,
     $.think_group,
+    $.tools_group,
     $.tool_call_group,
     $.tool_response_group,
     $.full_messages_group,
