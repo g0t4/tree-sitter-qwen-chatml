@@ -49,7 +49,9 @@ export default grammar({
 
     message: $ => seq(
       $.im_start_token,
-      field("role", $.until_end_of_line), // greedy, take until end of line
+      choice(
+        field("role", $.until_end_of_line) // greedy, take until end of line
+      ),
       '\n',
 
       // thinking (must come before tool_call request)
