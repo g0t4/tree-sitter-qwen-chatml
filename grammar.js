@@ -51,13 +51,6 @@ export default grammar({
       /</ // force decision on single < which means it is allowed too just only one char at a time
     )),
 
-    repo_name_token: $ => token(constants.REPO_NAME),
-    repo_name_group: $ => seq(
-      $.repo_name_token,
-      field("repo_name", $.until_end_of_line),
-      "\n"
-    ),
-
     fim_file_level: $ => seq(
       $.fim_prefix_token,
       optional(prec(-9, field("prefix", $.text))),
@@ -75,6 +68,13 @@ export default grammar({
         seq($.repo_name_group, repeat($.repo_file)), // BOTH repo_name AND ONE (or MORE) repo_files 
       ),
       $.fim_file_level,
+    ),
+
+    repo_name_token: $ => token(constants.REPO_NAME),
+    repo_name_group: $ => seq(
+      $.repo_name_token,
+      field("repo_name", $.until_end_of_line),
+      "\n"
     ),
 
     repo_file: $ => seq(
