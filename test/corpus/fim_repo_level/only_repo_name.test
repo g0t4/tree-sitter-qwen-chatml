@@ -20,7 +20,7 @@ return M<|fim_middle|>a + b
   (fim_repo_level
     (repo_name_token)
     repo_name: (until_end_of_line)
-    (fim_file
+    (fim_file_level
       (fim_prefix_token)
       prefix: (text)
       (fim_suffix_token)

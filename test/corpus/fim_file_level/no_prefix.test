@@ -7,7 +7,7 @@ no prefix in file level FIM
 return M<|fim_middle|>
 ---
 (source_file
-  (fim_file
+  (fim_file_level
     (fim_prefix_token)
     (fim_suffix_token)
     suffix: (text)

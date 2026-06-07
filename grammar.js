@@ -20,11 +20,11 @@ export default grammar({
   rules: {
     source_file: $ => choice(
       repeat($.message),
-      $.fim_file,
+      $.fim_file_level,
       $.fim_repo_level,
     ),
 
-    fim_file: $ => seq(
+    fim_file_level: $ => seq(
 
       $.fim_prefix_token,
       optional(prec(-9, field("prefix", $.text))),
@@ -83,7 +83,7 @@ export default grammar({
         repeat1($.repo_file), // ONE (or MORE) repo_files
         seq($.repo_name_group, repeat($.repo_file)), // BOTH repo_name AND ONE (or MORE) repo_files 
       ),
-      $.fim_file,
+      $.fim_file_level,
     ),
 
     fim_prefix_token: $ => token(constants.FIM_PREFIX),

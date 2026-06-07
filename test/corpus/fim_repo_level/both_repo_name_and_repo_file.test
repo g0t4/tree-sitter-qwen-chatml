@@ -65,7 +65,7 @@ return M<|fim_middle|>a + b
         (file_sep_token)
         path: (until_end_of_line)
     )
-    (fim_file
+    (fim_file_level
       (fim_prefix_token)
       prefix: (text)
       (fim_suffix_token)

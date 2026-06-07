@@ -15,7 +15,7 @@ end
 <|fim_suffix|><|fim_middle|>
 ---
 (source_file
-  (fim_file
+  (fim_file_level
     (fim_prefix_token)
     prefix: (text)
     (fim_suffix_token)
