@@ -24,18 +24,6 @@ export default grammar({
       $.fim_repo_level,
     ),
 
-    fim_file_level: $ => seq(
-
-      $.fim_prefix_token,
-      optional(prec(-9, field("prefix", $.text))),
-
-      $.fim_suffix_token,
-      optional(prec(-9, field("suffix", $.text))),
-
-      $.fim_middle_token,
-      optional(prec(-9, field("middle", $.text))),
-
-    ),
 
     message: $ => seq($.im_start_token,
       field("role", $.until_end_of_line), // greedy, take until end of line
@@ -68,6 +56,15 @@ export default grammar({
       $.repo_name_token,
       field("repo_name", $.until_end_of_line),
       "\n"
+    ),
+
+    fim_file_level: $ => seq(
+      $.fim_prefix_token,
+      optional(prec(-9, field("prefix", $.text))),
+      $.fim_suffix_token,
+      optional(prec(-9, field("suffix", $.text))),
+      $.fim_middle_token,
+      optional(prec(-9, field("middle", $.text))),
     ),
 
     repo_file: $ => seq(
