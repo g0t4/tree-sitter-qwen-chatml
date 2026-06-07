@@ -19,7 +19,11 @@ export default grammar({
 
   rules: {
     source_file: $ => choice(
-      repeat($.message),
+      choice(
+        repeat($.message), // only full messages
+        $.prefill_message, // only a prefill message (kinda weird though)
+        seq(repeat($.message), $.prefill_message), // full messages and then prefill on end (this is realisitic scenario for assistant prefill)
+      ),
       $.fim_file_level,
       $.fim_repo_level,
     ),
@@ -39,6 +43,12 @@ export default grammar({
       prec(-9, field("contents", $.text)),
       $.im_end_token
     ),
+
+    prefill_message: $ => seq(
+      $.im_start_token,
+      field("role", $.until_end_of_line),
+    ),
+
 
     think_open_token: $ => token(constants.THINK_OPEN),
     think_close_token: $ => token(constants.THINK_CLOSE),

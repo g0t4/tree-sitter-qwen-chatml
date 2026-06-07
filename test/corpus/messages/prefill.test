@@ -1,0 +1,18 @@
+==================
+prefill assistant message
+- often useful to parse the prompt that goes into a model w/o the completion that emits after
+:language(qwen_chatml)
+==================
+<|im_start|>user
+What is the color of the sky?<|im_end|>
+<|im_start|>assistant
+---
+(source_file
+  (message
+    (im_start_token)
+    role: (until_end_of_line) 
+    contents: (text)
+    (im_end_token))
+  (prefill_message
+    (im_start_token)
+    role: (until_end_of_line)))
