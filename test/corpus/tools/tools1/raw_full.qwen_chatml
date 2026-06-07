@@ -67,10 +67,12 @@ I should present this clearly.
     (tools_close_tag)
     (tool_call_open_tag)
     function_name: (big_word)
-    parameter_name: (big_word)
-    parameter_value: (text)
-    parameter_name: (big_word)
-    parameter_value: (text)
+    (parameter
+      name: (big_word)
+      value: (text))
+    (parameter
+      name: (big_word)
+      value: (text))
     (tool_call_close_tag)
     contents: (text)
     (im_end_token))

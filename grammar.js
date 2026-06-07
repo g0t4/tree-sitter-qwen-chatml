@@ -130,12 +130,16 @@ export default grammar({
     tool_call_group: $ => seq(
       $.tool_call_open_tag, "\n",
       "<function=", field("function_name", $.big_word), ">\n",
-      repeat(seq("<parameter=", field("parameter_name", $.big_word), ">",
-        field("parameter_value", $.text),
-        "</parameter>",
-      )),
+      repeat($.parameter),
       "</function>\n",
       $.tool_call_close_tag, "\n",
+    ),
+    parameter: $ => seq(
+      "<parameter=",
+      field("name", $.big_word),
+      ">",
+      field("value", $.text),
+      "</parameter>\n"
     ),
     tool_call_open_tag: $ => token(constants.TOOL_CALL_OPEN),
     tool_call_close_tag: $ => token(constants.TOOL_CALL_CLOSE),
