@@ -18,7 +18,7 @@ end
 return M<|fim_middle|>a + b
 ---
 (source_file
-  (fim_repo
+  (fim_repo_level
     (repo_file
         (file_sep_token)
         path: (until_end_of_line)

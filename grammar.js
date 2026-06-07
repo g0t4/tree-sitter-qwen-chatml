@@ -21,7 +21,7 @@ export default grammar({
     source_file: $ => choice(
       repeat($.message),
       $.fim_file,
-      $.fim_repo,
+      $.fim_repo_level,
     ),
 
     fim_file: $ => seq(
@@ -77,7 +77,7 @@ export default grammar({
       optional(prec(-9, field("contents", $.text)))),
 
     file_sep_token: $ => token(constants.FILE_SEP),
-    fim_repo: $ => seq(
+    fim_repo_level: $ => seq(
       choice(
         $.repo_name_group, // ONLY ONE repo_name
         repeat1($.repo_file), // ONE (or MORE) repo_files
