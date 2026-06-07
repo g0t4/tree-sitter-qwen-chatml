@@ -13,6 +13,7 @@ export default grammar({
   name: "qwen_chatml",
 
   inline: $ => [
+    $.repo_name_group,
     // logical grouping (not actual nodes)
   ],
 
@@ -63,9 +64,9 @@ export default grammar({
     )),
 
     repo_name_token: $ => token(constants.REPO_NAME),
-    repo_name: $ => seq(
+    repo_name_group: $ => seq(
       $.repo_name_token,
-      field("name", $.until_end_of_line),
+      field("repo_name", $.until_end_of_line),
       "\n"
     ),
 
@@ -77,7 +78,7 @@ export default grammar({
 
     file_sep_token: $ => token(constants.FILE_SEP),
     fim_repo: $ => seq(
-      optional($.repo_name),
+      optional($.repo_name_group),
       repeat1($.repo_file),
       $.fim_file,
     ),
