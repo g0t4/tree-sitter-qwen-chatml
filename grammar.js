@@ -56,7 +56,7 @@ export default grammar({
       optional($.think_group),
       optional($.tools_group),
 
-      // TODO "contents" before tool_call (see system prompt) => adjust system prompt to add back default
+      // TODO "contents" before tool_call too (see system prompt) => adjust system prompt to add back default
       optional($.tool_call_group),
 
       optional(prec(-9, field("contents", $.text))), // TODO not contents2
