@@ -79,14 +79,12 @@ export default grammar({
     file_sep_token: $ => token(constants.FILE_SEP),
     fim_repo: $ => seq(
       choice(
-        $.repo_name_group, // only repo_name
-        repeat1($.repo_file), // 1+ repo_files
-        seq($.repo_name_group, repeat($.repo_file)), // repo_name AND 1+ repo_files 
+        $.repo_name_group, // ONLY ONE repo_name
+        repeat1($.repo_file), // ONE (or MORE) repo_files
+        seq($.repo_name_group, repeat($.repo_file)), // BOTH repo_name AND ONE (or MORE) repo_files 
       ),
       $.fim_file,
     ),
-
-
 
     fim_prefix_token: $ => token(constants.FIM_PREFIX),
     fim_suffix_token: $ => token(constants.FIM_SUFFIX),
