@@ -59,8 +59,9 @@ export default grammar({
       // TODO "contents" before tool_call (see system prompt) => adjust system prompt to add back default
       optional($.tool_call_group),
 
-      prec(-9, field("contents", $.text)), // TODO not contents2
-      optional($.im_end_token) // FYI this should only be if it is the last message but not gonna bother with that constraint for now
+      optional(prec(-9, field("contents", $.text))), // TODO not contents2
+      optional($.im_end_token), // FYI this should only be if it is the last message but not gonna bother with that constraint for now
+      optional("\n"),
     ),
 
     prefill_message: $ => seq(
@@ -71,7 +72,8 @@ export default grammar({
     think_group: $ => seq(
       $.think_open_tag,
       optional(prec(-9, field("reasoning", $.text))),
-      $.think_close_tag
+      $.think_close_tag,
+      optional("\n"),
     ),
     think_open_tag: $ => token(constants.THINK_OPEN),
     think_close_tag: $ => token(constants.THINK_CLOSE),

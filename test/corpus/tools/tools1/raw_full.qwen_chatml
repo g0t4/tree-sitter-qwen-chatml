@@ -57,6 +57,7 @@ I should present this clearly.
 
 - **Date:** Friday, June 5, 2026 at 6:27 PM CDT
 - **Hostname:** `mbp21`
+<|im_end|>
 ---
 (source_file
   (message
@@ -88,9 +89,11 @@ I should present this clearly.
     reasoning: (text) 
     (think_close_tag) 
     (tool_call_open_tag)
-    TODO: (text)
+    function_name: (big_word)
+    (parameter
+      name: (big_word)
+      value: (text))
     (tool_call_close_tag)
-    contents: (text)
     (im_end_token))
   (response_message
     (im_start_token)
@@ -105,4 +108,5 @@ I should present this clearly.
     (think_open_tag)
     reasoning: (text) 
     (think_close_tag)
-    contents: (text)))
+    contents: (text)
+    (im_end_token)))
