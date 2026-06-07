@@ -13,7 +13,7 @@ export default grammar({
   name: "qwen_chatml",
 
   inline: $ => [
-    $.think_section_inlined,
+    // logical grouping (not actual nodes)
   ],
 
   rules: {
@@ -39,7 +39,14 @@ export default grammar({
     message: $ => seq($.im_start_token,
       field("role", $.until_end_of_line), // greedy, take until end of line
       '\n',
-      optional($.think_section_inlined),
+
+      // thinking:
+      optional(seq(
+        $.think_open_token,
+        optional(prec(-9, field("reasoning", $.text))),
+        $.think_close_token
+      )),
+
       prec(-9, field("contents", $.text)),
       $.im_end_token
     ),
@@ -47,11 +54,6 @@ export default grammar({
 
     think_open_token: $ => token(constants.THINK_OPEN),
     think_close_token: $ => token(constants.THINK_CLOSE),
-    think_section_inlined: $ => seq(
-      $.think_open_token,
-      optional(prec(-9, field("reasoning", $.text))),
-      $.think_close_token
-    ),
 
 
     until_end_of_line: $ => repeat1(/[^\n]+/), // until end of line
