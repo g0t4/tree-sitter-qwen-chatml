@@ -10,7 +10,8 @@
         "qwen_chatml"
       ],
       "injection-regex": "^qwen_chatml$",
-      "class-name": "TreeSitterQwenChatml"
+      "class-name": "TreeSitterQwenChatml",
+      "highlights": "queries/qwen_chatml/highlights.scm"
     }
   ],
   "metadata": {
