@@ -39,3 +39,9 @@
   (repo_file
     contents: (text)) @qwen_file_contents
 ]
+
+[
+  (think_open_tag) @qwen_think_tag
+  reasoning: (text) @qwen_think_reasoning
+  (think_close_tag) @qwen_think_tag
+]
